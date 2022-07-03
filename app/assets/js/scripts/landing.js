@@ -112,6 +112,10 @@ document.getElementById('launch_button').addEventListener('click', function(e){
 document.getElementById('settingsMediaButton').onclick = (e) => {
     prepareSettings()
     switchView(getCurrentView(), VIEWS.settings)
+    if(hasRPC){
+        DiscordWrapper.updateDetails('Dans les paramètres...')
+        DiscordWrapper.clearState()
+    }
 }
 
 // Bind avatar overlay button.
@@ -248,6 +252,30 @@ const refreshServerStatus = async function(fade = false){
         document.getElementById('player_count').innerHTML = pVal
     }
     
+}
+
+function loadDiscord(){
+    if(!ConfigManager.getDiscordIntegration()) return
+    const distro = DistroManager.getDistribution()
+    const serv = distro.getServer(ConfigManager.getSelectedServer())
+
+    loggerLanding.log('Now loading DiscordRPC')
+    if(!hasRPC){
+        if(distro.discord != null){
+            DiscordWrapper.initRPC(distro.discord, serv.discord, 'Page d\'accueil')
+            hasRPC = true
+        }
+    }
+    setTimeout(() => {
+        if(hasRPC){
+            if(serv){
+                DiscordWrapper.updateDetails('Prêt à jouer !')
+                DiscordWrapper.updateState('> Sur ' + serv.getName())
+            } else {
+                DiscordWrapper.updateDetails('Page d\'accueil')
+            }
+        }
+    }, 1000)
 }
 
 refreshMojangStatuses()
@@ -657,6 +685,7 @@ function dlAsync(login = true){
                     toggleLaunchArea(false)
                     if(hasRPC){
                         DiscordWrapper.updateDetails('Chargement du jeu...')
+                        DiscordWrapper.resetTime()
                     }
                     proc.stdout.on('data', gameStateChange)
                     proc.stdout.removeListener('data', tempListener)
@@ -683,9 +712,8 @@ function dlAsync(login = true){
                 const gameStateChange = function(data){
                     data = data.trim()
                     if(SERVER_JOINED_REGEX.test(data)){
-                        DiscordWrapper.updateDetails('Explore un monde !')
-                    } else if(GAME_JOINED_REGEX.test(data)){
-                        DiscordWrapper.updateDetails('Parcours l\'univers !')
+                        DiscordWrapper.updateDetails('Explore le monde !')
+                        DiscordWrapper.resetTime()
                     }
                 }
 
@@ -706,6 +734,14 @@ function dlAsync(login = true){
                     proc.stderr.on('data', gameErrorListener)
 
                     setLaunchDetails('Terminé. Profitez du serveur !')
+                    proc.on('close', (code, signal) => {
+                        if(hasRPC){
+                            const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
+                            DiscordWrapper.updateDetails('Prêt à jouer !')
+                            DiscordWrapper.updateState('> Sur ' + serv.getName())
+                            DiscordWrapper.resetTime()
+                        }
+                    })
 
                     // Init Discord Hook
                     const distro = DistroManager.getDistribution()
@@ -837,6 +873,15 @@ document.getElementById('newsButton').onclick = () => {
     if(newsActive){
         $('#landingContainer *').removeAttr('tabindex')
         $('#newsContainer *').attr('tabindex', '-1')
+        if(hasRPC){
+            if(ConfigManager.getSelectedServer()){
+                const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
+                DiscordWrapper.updateDetails('Prêt à jouer !')
+                DiscordWrapper.updateState('> Sur ' + serv.getName())
+            } else {
+                DiscordWrapper.updateDetails('Page d\'accueil')
+            }
+        }
     } else {
         $('#landingContainer *').attr('tabindex', '-1')
         $('#newsContainer, #newsContainer *, #lower, #lower #center *').removeAttr('tabindex')
@@ -845,6 +890,10 @@ document.getElementById('newsButton').onclick = () => {
             newsAlertShown = false
             ConfigManager.setNewsCacheDismissed(true)
             ConfigManager.save()
+        }
+        if(hasRPC){
+            DiscordWrapper.updateDetails('Lis les articles...')
+            DiscordWrapper.clearState()
         }
     }
     slide_(!newsActive)

@@ -313,6 +313,15 @@ settingsNavDone.onclick = () => {
     saveDropinModConfiguration()
     saveShaderpackSettings()
     switchView(getCurrentView(), VIEWS.landing)
+    if(hasRPC){
+        if(ConfigManager.getSelectedServer()){
+            const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
+            DiscordWrapper.updateDetails('Prêt à jouer !')
+            DiscordWrapper.updateState('> Sur ' + serv.getName())
+        } else {
+            DiscordWrapper.updateDetails('Page d\'accueil')
+        }
+    }
 }
 
 /**
@@ -328,6 +337,10 @@ document.getElementById('settingsAddMojangAccount').onclick = (e) => {
         loginViewOnCancel = VIEWS.settings
         loginViewOnSuccess = VIEWS.settings
         loginCancelEnabled(true)
+        if(hasRPC){
+            DiscordWrapper.updateDetails('Ajoute un compte...')
+            DiscordWrapper.clearState()
+        }
     })
 }
 
