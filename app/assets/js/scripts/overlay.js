@@ -86,7 +86,7 @@ function toggleOverlay(toggleState, dismissable = false, content = 'overlayConte
             $('#overlayDismiss').hide()
         }
         $('#overlayContainer').fadeIn({
-            duration: 250,
+            duration: 150,
             start: () => {
                 if(getCurrentView() === VIEWS.settings){
                     document.getElementById('settingsContainer').style.backgroundColor = 'transparent'
@@ -98,7 +98,7 @@ function toggleOverlay(toggleState, dismissable = false, content = 'overlayConte
         // Make things tabbable.
         $('#main *').removeAttr('tabindex')
         $('#overlayContainer').fadeOut({
-            duration: 250,
+            duration: 150,
             start: () => {
                 if(getCurrentView() === VIEWS.settings){
                     document.getElementById('settingsContainer').style.backgroundColor = 'rgba(0, 0, 0, 0.50)'
@@ -227,8 +227,8 @@ document.getElementById('serverSelectCancel').addEventListener('click', () => {
 })
 
 document.getElementById('accountSelectCancel').addEventListener('click', () => {
-    $('#accountSelectContent').fadeOut(250, () => {
-        $('#overlayContent').fadeIn(250)
+    $('#accountSelectContent').fadeOut(150, () => {
+        $('#overlayContent').fadeIn(150)
     })
 })
 

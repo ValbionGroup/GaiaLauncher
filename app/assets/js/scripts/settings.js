@@ -270,9 +270,9 @@ function settingsNavItemListener(ele, fade = true){
     document.getElementById(selectedSettingsTab).onscroll = settingsTabScrollListener
 
     if(fade){
-        $(`#${prevTab}`).fadeOut(250, () => {
+        $(`#${prevTab}`).fadeOut(150, () => {
             $(`#${selectedSettingsTab}`).fadeIn({
-                duration: 250,
+                duration: 150,
                 start: () => {
                     settingsTabScrollListener({
                         target: document.getElementById(selectedSettingsTab)
@@ -333,7 +333,7 @@ const msftLogoutLogger = LoggerUtil.getLogger('Microsoft Logout')
 
 // Bind the add mojang account button.
 document.getElementById('settingsAddMojangAccount').onclick = (e) => {
-    switchView(getCurrentView(), VIEWS.login, 500, 500, () => {
+    switchView(getCurrentView(), VIEWS.login, 250, 20, () => {
         loginViewOnCancel = VIEWS.settings
         loginViewOnSuccess = VIEWS.settings
         loginCancelEnabled(true)
@@ -529,7 +529,7 @@ function processLogOut(val, isLastAccount){
                 switchView(getCurrentView(), VIEWS.loginOptions)
             }
         })
-        $(parent).fadeOut(250, () => {
+        $(parent).fadeOut(150, () => {
             parent.remove()
         })
     }
@@ -1112,9 +1112,9 @@ function saveAllModConfigurations(){
  * server is changed.
  */
 function animateModsTabRefresh(){
-    $('#settingsTabMods').fadeOut(500, () => {
+    $('#settingsTabMods').fadeOut(150, () => {
         prepareModsTab()
-        $('#settingsTabMods').fadeIn(500)
+        $('#settingsTabMods').fadeIn(150)
     })
 }
 

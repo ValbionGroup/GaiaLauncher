@@ -167,7 +167,7 @@ function loginCancelEnabled(val){
 }
 
 loginCancelButton.onclick = (e) => {
-    switchView(getCurrentView(), loginViewOnCancel, 500, 500, () => {
+    switchView(getCurrentView(), loginViewOnCancel, 250, 250, () => {
         loginUsername.value = ''
         loginPassword.value = ''
         loginCancelEnabled(false)
