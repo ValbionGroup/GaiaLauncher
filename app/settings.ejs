@@ -7,10 +7,11 @@
             <div id="settingsNavItemsContainer">
                 <div id="settingsNavItemsContent">
                     <button class="settingsNavItem" rSc="settingsTabAccount" id="settingsNavAccount" selected>Compte</button>
+                    <button class="settingsNavItem" rSc="settingsTabLauncher">Launcher</button>
+                    <div class="settingsNavSpacer"></div>
                     <button class="settingsNavItem" rSc="settingsTabMinecraft">Minecraft</button>
                     <button class="settingsNavItem" rSc="settingsTabMods">Mods</button>
                     <button class="settingsNavItem" rSc="settingsTabJava">Java</button>
-                    <button class="settingsNavItem" rSc="settingsTabLauncher">Launcher</button>
                     <div class="settingsNavSpacer"></div>
                     <button class="settingsNavItem" rSc="settingsTabAbout">A propos</button>
                     <button class="settingsNavItem" rSc="settingsTabUpdate" id="settingsNavUpdate">Mise à jours</button>
@@ -116,6 +117,18 @@
                     </label>
                 </div>
             </div>
+            <div class="settingsFieldContainer">
+                <div class="settingsFieldLeft">
+                    <span class="settingsFieldTitle">Ouvrir la console au lancement</span>
+                    <span class="settingsFieldDesc">Cela ouvre la DevTool Console au lancement et vous permet de visualiser le journal du client en temps réel.</span>
+                </div>
+                <div class="settingsFieldRight">
+                    <label class="toggleSwitch">
+                        <input type="checkbox" cValue="ConsoleOnLaunch">
+                        <span class="toggleSwitchSlider"></span>
+                    </label>
+                </div>
+            </div>
         </div>
         <div id="settingsTabMods" class="settingsTab" style="display: none;">
             <div class="settingsTabHeader">
@@ -196,7 +209,7 @@
                                 <span id="settingsMinRAMLabel" class="settingsMemoryLabel">3G</span>
                             </div>
                         </div>
-                        <div id="settingsMemoryDesc">The recommended minimum RAM is 3 gigabytes. Setting the minimum and maximum values to the same value may reduce lag.</div>
+                        <div id="settingsMemoryDesc">The recommended minimum RAM is 4GB. Setting the minimum and maximum values to the same value may reduce lag. In order to use the memory you have allocated, it must be free and available in your system. Allocating all of your total memory is not recommended.</div>
                     </div>
                     <div id="settingsMemoryContentRight">
                         <div id="settingsMemoryStatus">
@@ -276,6 +289,18 @@
                     </label>
                 </div>
             </div>
+            <div class="settingsFieldContainer">
+                <div class="settingsFieldLeft">
+                    <span class="settingsFieldTitle">Activez l'intégration de Discord</span>
+                    <span class="settingsFieldDesc">Cette option permet au lanceur de contrôler votre présence sur Discord. Si vous fermez le lanceur à tout moment, cette fonctionnalité ne fonctionnera plus. Ce paramètre nécessite de relancer le launcher.</span>
+                </div>
+                <div class="settingsFieldRight">
+                    <label class="toggleSwitch">
+                        <input type="checkbox" cValue="DiscordIntegration">
+                        <span class="toggleSwitchSlider"></span>
+                    </label>
+                </div>
+            </div>
             <div class="settingsFileSelContainer">
                 <div class="settingsFileSelContent">
                     <div class="settingsFieldTitle" id="settingsDataDirTitle">Répertoire des données</div>
@@ -294,6 +319,24 @@
                     </div>
                 </div>
                 <div class="settingsFileSelDesc">Tous les fichiers de jeu et les installations Java locales seront stockés dans le répertoire data.<br>Les captures d'écran et les sauvegardes du monde sont stockées dans le dossier instance de la configuration de serveur correspondante.</div>
+            </div>
+            <div class="settingsServerCodeContainer">
+                <div class="settingsServerCodesTitle">Vos codes de serveur</div>
+                <div class="settingsServerCodeContent">
+                    <div class="settingsServerCodeActions">
+                        <div class="settingsServerCodeIcon">
+                            <svg class="settingsServerCodeSVG" viewBox="0 0 24 24">
+                                <path d="M8.95 8.6a6.554 6.554 0 0 1 6.55-6.55c3.596 0 6.55 2.819 6.55 6.45a6.554 6.554 0 0 1-6.55 6.55c-.531 0-1.055-.076-1.552-.204A1.25 1.25 0 0 1 12.7 16.05h-1.75v1.75c0 .69-.56 1.25-1.25 1.25H7.95v1.25a1.75 1.75 0 0 1-1.75 1.75H3.7a1.75 1.75 0 0 1-1.75-1.75v-2.172c0-.73.29-1.429.806-1.944L8.99 9.948a.275.275 0 0 0 .07-.244A6.386 6.386 0 0 1 8.95 8.6Zm9.3-1.6a1.25 1.25 0 1 0-2.5 0 1.25 1.25 0 0 0 2.5 0Z" fill="lightgray"/>
+                            </svg>
+                        </div>
+                        <input class="settingsInputServerCodeVal" placeholder="Entrer un code" type="text">
+                        <button class="settingsInputServerCodeButton" id="settingsAddServerCode">Ajouter un code</button>
+                    </div>
+                </div>
+                <div id="settingsServerCodesListContent">
+
+                </div>
+                <div class="settingsServerCodesDesc">Spécifiez les codes de serveur ici pour accorder l'accès à des serveurs cachés qui ne seraient pas disponibles pour tous les utilisateurs par défaut.</div>
             </div>
         </div>
         <div id="settingsTabAbout" class="settingsTab" style="display: none;">
