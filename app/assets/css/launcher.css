@@ -749,7 +749,7 @@ body, button {
 
 
 
-/*.spinningCircle {
+.spinningCircle {
     margin-left: 20px;
     height: 16px;
     width: 16px;
@@ -769,7 +769,7 @@ body, button {
     100% {
         transform: rotate(720deg);
     }
-}*/
+}
 
 /* Disclaimer container. */
 #loginDisclaimer {
@@ -2855,7 +2855,7 @@ input:checked + .toggleSwitchSlider:before {
 
 /* Logo image. */
 #image_seal {
-    height: 70px;
+    height: 100px;
     width: auto;
     position: relative;
     border: 2px solid white;

@@ -86,7 +86,7 @@ function toggleOverlay(toggleState, dismissable = false, content = 'overlayConte
             $('#overlayDismiss').hide()
         }
         $('#overlayContainer').fadeIn({
-            duration: 250,
+            duration: 150,
             start: () => {
                 if(getCurrentView() === VIEWS.settings){
                     document.getElementById('settingsContainer').style.backgroundColor = 'transparent'
@@ -98,7 +98,7 @@ function toggleOverlay(toggleState, dismissable = false, content = 'overlayConte
         // Make things tabbable.
         $('#main *').removeAttr('tabindex')
         $('#overlayContainer').fadeOut({
-            duration: 250,
+            duration: 150,
             start: () => {
                 if(getCurrentView() === VIEWS.settings){
                     document.getElementById('settingsContainer').style.backgroundColor = 'rgba(0, 0, 0, 0.50)'
@@ -120,6 +120,7 @@ function toggleOverlay(toggleState, dismissable = false, content = 'overlayConte
 function toggleServerSelection(toggleState){
     prepareServerSelectionList()
     toggleOverlay(toggleState, true, 'serverSelectContent')
+    DiscordWrapper.updateDetails('Sélectionne un serveur...')
 }
 
 /**
@@ -179,6 +180,8 @@ document.getElementById('serverSelectConfirm').addEventListener('click', () => {
             updateSelectedServer(serv)
             refreshServerStatus(true)
             toggleOverlay(false)
+            DiscordWrapper.updateDetails('Prêt à jouer !')
+            DiscordWrapper.updateState('> Sur ' + serv.getName())
             return
         }
     }
@@ -224,8 +227,8 @@ document.getElementById('serverSelectCancel').addEventListener('click', () => {
 })
 
 document.getElementById('accountSelectCancel').addEventListener('click', () => {
-    $('#accountSelectContent').fadeOut(250, () => {
-        $('#overlayContent').fadeIn(250)
+    $('#accountSelectContent').fadeOut(150, () => {
+        $('#overlayContent').fadeIn(150)
     })
 })
 
@@ -289,7 +292,7 @@ function populateServerListings(){
                             <path class="cls-1" d="M100.93,65.54C89,62,68.18,55.65,63.54,52.13c2.7-5.23,18.8-19.2,28-27.55C81.36,31.74,63.74,43.87,58.09,45.3c-2.41-5.37-3.61-26.52-4.37-39-.77,12.46-2,33.64-4.36,39-5.7-1.46-23.3-13.57-33.49-20.72,9.26,8.37,25.39,22.36,28,27.55C39.21,55.68,18.47,62,6.52,65.55c12.32-2,33.63-6.06,39.34-4.9-.16,5.87-8.41,26.16-13.11,37.69,6.1-10.89,16.52-30.16,21-33.9,4.5,3.79,14.93,23.09,21,34C70,86.84,61.73,66.48,61.59,60.65,67.36,59.49,88.64,63.52,100.93,65.54Z"/>
                             <circle class="cls-2" cx="53.73" cy="53.9" r="38"/>
                         </svg>
-                        <span class="serverListingStarTooltip">Main Server</span>
+                        <span class="serverListingStarTooltip">Serveur principal</span>
                     </div>` : ''}
                 </div>
             </div>

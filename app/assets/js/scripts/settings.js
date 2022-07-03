@@ -270,9 +270,9 @@ function settingsNavItemListener(ele, fade = true){
     document.getElementById(selectedSettingsTab).onscroll = settingsTabScrollListener
 
     if(fade){
-        $(`#${prevTab}`).fadeOut(250, () => {
+        $(`#${prevTab}`).fadeOut(150, () => {
             $(`#${selectedSettingsTab}`).fadeIn({
-                duration: 250,
+                duration: 150,
                 start: () => {
                     settingsTabScrollListener({
                         target: document.getElementById(selectedSettingsTab)
@@ -313,6 +313,15 @@ settingsNavDone.onclick = () => {
     saveDropinModConfiguration()
     saveShaderpackSettings()
     switchView(getCurrentView(), VIEWS.landing)
+    if(hasRPC){
+        if(ConfigManager.getSelectedServer()){
+            const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
+            DiscordWrapper.updateDetails('Prêt à jouer !')
+            DiscordWrapper.updateState('> Sur ' + serv.getName())
+        } else {
+            DiscordWrapper.updateDetails('Page d\'accueil')
+        }
+    }
 }
 
 /**
@@ -324,10 +333,14 @@ const msftLogoutLogger = LoggerUtil.getLogger('Microsoft Logout')
 
 // Bind the add mojang account button.
 document.getElementById('settingsAddMojangAccount').onclick = (e) => {
-    switchView(getCurrentView(), VIEWS.login, 500, 500, () => {
+    switchView(getCurrentView(), VIEWS.login, 250, 20, () => {
         loginViewOnCancel = VIEWS.settings
         loginViewOnSuccess = VIEWS.settings
         loginCancelEnabled(true)
+        if(hasRPC){
+            DiscordWrapper.updateDetails('Ajoute un compte...')
+            DiscordWrapper.clearState()
+        }
     })
 }
 
@@ -516,7 +529,7 @@ function processLogOut(val, isLastAccount){
                 switchView(getCurrentView(), VIEWS.loginOptions)
             }
         })
-        $(parent).fadeOut(250, () => {
+        $(parent).fadeOut(150, () => {
             parent.remove()
         })
     }
@@ -1099,9 +1112,9 @@ function saveAllModConfigurations(){
  * server is changed.
  */
 function animateModsTabRefresh(){
-    $('#settingsTabMods').fadeOut(500, () => {
+    $('#settingsTabMods').fadeOut(150, () => {
         prepareModsTab()
-        $('#settingsTabMods').fadeIn(500)
+        $('#settingsTabMods').fadeIn(150)
     })
 }
 
@@ -1155,9 +1168,9 @@ settingsMinRAMRange.onchange = (e) => {
     const max = (os.totalmem()-1000000000)/1000000000
 
     // Change range bar color based on the selected value.
-    if(sMinV >= max/2){
+    if(sMinV >= max/1.25){
         bar.style.background = '#e86060'
-    } else if(sMinV >= max/4) {
+    } else if(sMinV >= max/2) {
         bar.style.background = '#e8e18b'
     } else {
         bar.style.background = null
@@ -1187,9 +1200,9 @@ settingsMaxRAMRange.onchange = (e) => {
     const max = (os.totalmem()-1000000000)/1000000000
 
     // Change range bar color based on the selected value.
-    if(sMaxV >= max/2){
+    if(sMaxV >= max/1.25){
         bar.style.background = '#e86060'
-    } else if(sMaxV >= max/4) {
+    } else if(sMaxV >= max/2) {
         bar.style.background = '#e8e18b'
     } else {
         bar.style.background = null

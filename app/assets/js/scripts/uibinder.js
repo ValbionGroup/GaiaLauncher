@@ -38,7 +38,7 @@ let currentView
  * @param {*} onNextFade Optional. Callback function to execute when the next view
  * fades in.
  */
-function switchView(current, next, currentFadeTime = 500, nextFadeTime = 500, onCurrentFade = () => {}, onNextFade = () => {}){
+function switchView(current, next, currentFadeTime = 250, nextFadeTime = 250, onCurrentFade = () => {}, onNextFade = () => {}){
     currentView = next
     $(`${current}`).fadeOut(currentFadeTime, () => {
         onCurrentFade()
@@ -67,6 +67,7 @@ function showMainUI(data){
     prepareSettings(true)
     updateSelectedServer(data.getServer(ConfigManager.getSelectedServer()))
     refreshServerStatus()
+    loadDiscord()
     setTimeout(() => {
         document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
         document.body.style.backgroundImage = `url('assets/images/backgrounds/${document.body.getAttribute('bkid')}.jpg')`
@@ -93,11 +94,15 @@ function showMainUI(data){
                 loginOptionsViewOnLoginCancel = VIEWS.loginOptions
                 currentView = VIEWS.loginOptions
                 $(VIEWS.loginOptions).fadeIn(1000)
+                if(hasRPC){
+                    DiscordWrapper.updateDetails('Ajoute un compte...')
+                    DiscordWrapper.clearState()
+                }
             }
         }
 
         setTimeout(() => {
-            $('#loadingContainer').fadeOut(500, () => {
+            $('#loadingContainer').fadeOut(150, () => {
                 $('#loadSpinnerImage').removeClass('rotating')
             })
         }, 250)
@@ -111,7 +116,7 @@ function showMainUI(data){
 
 function showFatalStartupError(){
     setTimeout(() => {
-        $('#loadingContainer').fadeOut(250, () => {
+        $('#loadingContainer').fadeOut(150, () => {
             document.getElementById('overlayContainer').style.background = 'none'
             setOverlayContent(
                 'Erreur fatale : Impossible de charger l\'index de distribution',
@@ -374,13 +379,17 @@ async function validateSelectedAccount(){
                 }
                 toggleOverlay(false)
                 switchView(getCurrentView(), VIEWS.loginOptions)
+                if(hasRPC){
+                    DiscordWrapper.updateDetails('Ajoute un compte...')
+                    DiscordWrapper.clearState()
+                }
             })
             setDismissHandler(() => {
                 if(accLen > 1){
                     prepareAccountSelectionList()
-                    $('#overlayContent').fadeOut(250, () => {
+                    $('#overlayContent').fadeOut(150, () => {
                         bindOverlayKeys(true, 'accountSelectContent', true)
-                        $('#accountSelectContent').fadeIn(250)
+                        $('#accountSelectContent').fadeIn(150)
                     })
                 } else {
                     const accountsObj = ConfigManager.getAuthAccounts()

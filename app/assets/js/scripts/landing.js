@@ -112,6 +112,10 @@ document.getElementById('launch_button').addEventListener('click', function(e){
 document.getElementById('settingsMediaButton').onclick = (e) => {
     prepareSettings()
     switchView(getCurrentView(), VIEWS.settings)
+    if(hasRPC){
+        DiscordWrapper.updateDetails('Dans les paramètres...')
+        DiscordWrapper.clearState()
+    }
 }
 
 // Bind avatar overlay button.
@@ -130,7 +134,7 @@ function updateSelectedAccount(authUser){
             username = authUser.displayName
         }
         if(authUser.uuid != null){
-            document.getElementById('avatarContainer').style.backgroundImage = `url('https://mc-heads.net/body/${authUser.uuid}/right')`
+            document.getElementById('avatarContainer').style.backgroundImage = `url('https://mc-heads.net/avatar/${authUser.uuid}')`
         }
     }
     user_text.innerHTML = username
@@ -238,16 +242,40 @@ const refreshServerStatus = async function(fade = false){
         loggerLanding.debug(err)
     }
     if(fade){
-        $('#server_status_wrapper').fadeOut(250, () => {
+        $('#server_status_wrapper').fadeOut(150, () => {
             document.getElementById('landingPlayerLabel').innerHTML = pLabel
             document.getElementById('player_count').innerHTML = pVal
-            $('#server_status_wrapper').fadeIn(500)
+            $('#server_status_wrapper').fadeIn(250)
         })
     } else {
         document.getElementById('landingPlayerLabel').innerHTML = pLabel
         document.getElementById('player_count').innerHTML = pVal
     }
     
+}
+
+function loadDiscord(){
+    if(!ConfigManager.getDiscordIntegration()) return
+    const distro = DistroManager.getDistribution()
+    const serv = distro.getServer(ConfigManager.getSelectedServer())
+
+    loggerLanding.log('Now loading DiscordRPC')
+    if(!hasRPC){
+        if(distro.discord != null){
+            DiscordWrapper.initRPC(distro.discord, serv.discord, 'Page d\'accueil')
+            hasRPC = true
+        }
+    }
+    setTimeout(() => {
+        if(hasRPC){
+            if(serv){
+                DiscordWrapper.updateDetails('Prêt à jouer !')
+                DiscordWrapper.updateState('> Sur ' + serv.getName())
+            } else {
+                DiscordWrapper.updateDetails('Page d\'accueil')
+            }
+        }
+    }, 1000)
 }
 
 refreshMojangStatuses()
@@ -336,7 +364,7 @@ function asyncSystemScan(mcVersion, launchAfter = true){
                     toggleOverlay(false)
                 })
                 setDismissHandler(() => {
-                    $('#overlayContent').fadeOut(250, () => {
+                    $('#overlayContent').fadeOut(150, () => {
                         //$('#overlayDismiss').toggle(false)
                         setOverlayContent(
                             'Java is Required<br>to Launch',
@@ -352,7 +380,7 @@ function asyncSystemScan(mcVersion, launchAfter = true){
                             toggleOverlay(false, true)
                             asyncSystemScan()
                         })
-                        $('#overlayContent').fadeIn(250)
+                        $('#overlayContent').fadeIn(150)
                     })
                 })
                 toggleOverlay(true, true)
@@ -657,6 +685,7 @@ function dlAsync(login = true){
                     toggleLaunchArea(false)
                     if(hasRPC){
                         DiscordWrapper.updateDetails('Chargement du jeu...')
+                        DiscordWrapper.resetTime()
                     }
                     proc.stdout.on('data', gameStateChange)
                     proc.stdout.removeListener('data', tempListener)
@@ -683,9 +712,8 @@ function dlAsync(login = true){
                 const gameStateChange = function(data){
                     data = data.trim()
                     if(SERVER_JOINED_REGEX.test(data)){
-                        DiscordWrapper.updateDetails('Exploring the Realm!')
-                    } else if(GAME_JOINED_REGEX.test(data)){
-                        DiscordWrapper.updateDetails('Sailing to Westeros!')
+                        DiscordWrapper.updateDetails('Explore le monde !')
+                        DiscordWrapper.resetTime()
                     }
                 }
 
@@ -706,6 +734,14 @@ function dlAsync(login = true){
                     proc.stderr.on('data', gameErrorListener)
 
                     setLaunchDetails('Terminé. Profitez du serveur !')
+                    proc.on('close', (code, signal) => {
+                        if(hasRPC){
+                            const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
+                            DiscordWrapper.updateDetails('Prêt à jouer !')
+                            DiscordWrapper.updateState('> Sur ' + serv.getName())
+                            DiscordWrapper.resetTime()
+                        }
+                    })
 
                     // Init Discord Hook
                     const distro = DistroManager.getDistribution()
@@ -837,14 +873,27 @@ document.getElementById('newsButton').onclick = () => {
     if(newsActive){
         $('#landingContainer *').removeAttr('tabindex')
         $('#newsContainer *').attr('tabindex', '-1')
+        if(hasRPC){
+            if(ConfigManager.getSelectedServer()){
+                const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
+                DiscordWrapper.updateDetails('Prêt à jouer !')
+                DiscordWrapper.updateState('> Sur ' + serv.getName())
+            } else {
+                DiscordWrapper.updateDetails('Page d\'accueil')
+            }
+        }
     } else {
         $('#landingContainer *').attr('tabindex', '-1')
         $('#newsContainer, #newsContainer *, #lower, #lower #center *').removeAttr('tabindex')
         if(newsAlertShown){
-            $('#newsButtonAlert').fadeOut(2000)
+            $('#newsButtonAlert').fadeOut(1000)
             newsAlertShown = false
             ConfigManager.setNewsCacheDismissed(true)
             ConfigManager.save()
+        }
+        if(hasRPC){
+            DiscordWrapper.updateDetails('Lis les articles...')
+            DiscordWrapper.clearState()
         }
     }
     slide_(!newsActive)
@@ -885,9 +934,9 @@ function setNewsLoading(val){
 
 // Bind retry button.
 newsErrorRetry.onclick = () => {
-    $('#newsErrorFailed').fadeOut(250, () => {
+    $('#newsErrorFailed').fadeOut(150, () => {
         initNews()
-        $('#newsErrorLoading').fadeIn(250)
+        $('#newsErrorLoading').fadeIn(150)
     })
 }
 
@@ -907,8 +956,8 @@ newsArticleContentScrollable.onscroll = (e) => {
  */
 function reloadNews(){
     return new Promise((resolve, reject) => {
-        $('#newsContent').fadeOut(250, () => {
-            $('#newsErrorLoading').fadeIn(250)
+        $('#newsContent').fadeOut(150, () => {
+            $('#newsErrorLoading').fadeIn(150)
             initNews().then(() => {
                 resolve()
             })
@@ -947,8 +996,8 @@ function initNews(){
                 // News Loading Failed
                 setNewsLoading(false)
 
-                $('#newsErrorLoading').fadeOut(250, () => {
-                    $('#newsErrorFailed').fadeIn(250, () => {
+                $('#newsErrorLoading').fadeOut(150, () => {
+                    $('#newsErrorFailed').fadeIn(150, () => {
                         resolve()
                     })
                 })
@@ -963,8 +1012,8 @@ function initNews(){
                 })
                 ConfigManager.save()
 
-                $('#newsErrorLoading').fadeOut(250, () => {
-                    $('#newsErrorNone').fadeIn(250, () => {
+                $('#newsErrorLoading').fadeOut(150, () => {
+                    $('#newsErrorNone').fadeIn(150, () => {
                         resolve()
                     })
                 })
@@ -1022,9 +1071,9 @@ function initNews(){
                 document.getElementById('newsNavigateRight').onclick = () => { switchHandler(true) }
                 document.getElementById('newsNavigateLeft').onclick = () => { switchHandler(false) }
 
-                $('#newsErrorContainer').fadeOut(250, () => {
+                $('#newsErrorContainer').fadeOut(150, () => {
                     displayArticle(newsArr[0], 1)
-                    $('#newsContent').fadeIn(250, () => {
+                    $('#newsContent').fadeIn(150, () => {
                         resolve()
                     })
                 })
@@ -1103,7 +1152,7 @@ function loadNews(){
                     const el = $(items[i])
 
                     // Resolve date.
-                    const date = new Date(el.find('pubDate').text()).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric'})
+                    const date = new Date(el.find('pubDate').text()).toLocaleDateString('fr-FR', {month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric'})
 
                     // Resolve comments.
                     let comments = el.find('slash\\:comments').text() || '0'
