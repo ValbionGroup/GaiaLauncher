@@ -85,26 +85,28 @@ function setLaunchEnabled(val){
 
 // Bind launch button
 document.getElementById('launch_button').addEventListener('click', function(e){
-    loggerLanding.log('Launching game..')
-    const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
-    const jExe = ConfigManager.getJavaExecutable()
-    if(jExe == null){
-        asyncSystemScan(mcVersion)
-    } else {
+    if(checkCurrentServer(true)){
+        loggerLanding.log('Launching game..')
+        const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
+        const jExe = ConfigManager.getJavaExecutable()
+        if(jExe == null){
+            asyncSystemScan(mcVersion)
+        } else {
 
-        setLaunchDetails(Lang.queryJS('landing.launch.pleaseWait'))
-        toggleLaunchArea(true)
-        setLaunchPercentage(0, 100)
+            setLaunchDetails(Lang.queryJS('landing.launch.pleaseWait'))
+            toggleLaunchArea(true)
+            setLaunchPercentage(0, 100)
 
-        const jg = new JavaGuard(mcVersion)
-        jg._validateJavaBinary(jExe).then((v) => {
-            loggerLanding.log('Java version meta', v)
-            if(v.valid){
-                dlAsync()
-            } else {
-                asyncSystemScan(mcVersion)
-            }
-        })
+            const jg = new JavaGuard(mcVersion)
+            jg._validateJavaBinary(jExe).then((v) => {
+                loggerLanding.log('Java version meta', v)
+                if(v.valid){
+                    dlAsync()
+                } else {
+                    asyncSystemScan(mcVersion)
+                }
+            })
+        }
     }
 })
 
@@ -798,6 +800,39 @@ function dlAsync(login = true){
             }
         })
     })
+}
+
+/**
+ * Checks the current server to ensure that they still have permission to play it (checking server code, if applicable) and open up an error overlay if specified
+ * @Param {boolean} whether or not to show the error overlay
+ */
+ function checkCurrentServer(errorOverlay = true){
+    const selectedServId = ConfigManager.getSelectedServer()
+    if(selectedServId){
+        const selectedServ = DistroManager.getDistribution().getServer(selectedServId)
+        if(selectedServ){
+            if(selectedServ.getServerCode() && selectedServ.getServerCode() !== ''){
+                if(!ConfigManager.getServerCodes().includes(selectedServ.getServerCode())){
+                    if(errorOverlay){
+                        setOverlayContent(
+                            'Serveur actuel restreint !',
+                            'Il semble que vous n\'ayez plus le code serveur requis pour accéder à ce serveur ! Veuillez passer à un autre serveur pour jouer.<br><br>Si vous pensez qu\'il s\'agit d\'une erreur, veuillez contacter l\'administrateur du serveur.',
+                            'Changer de serveur'
+                        )
+                        setOverlayHandler(() => {
+                            toggleServerSelection(true)
+                        })
+                        setDismissHandler(() => {
+                            toggleOverlay(false)
+                        })
+                        toggleOverlay(true, true)
+                    }
+                    return false
+                }
+            }
+        }
+        return true
+    }
 }
 
 /**
