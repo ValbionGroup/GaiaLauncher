@@ -1568,7 +1568,7 @@ input:checked + .toggleSwitchSlider:before {
 .settingsServerCodeName {
     display: flex;
     flex-direction: column;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
 }
 
@@ -1578,7 +1578,7 @@ input:checked + .toggleSwitchSlider:before {
 
 .settingsServerCodeServerName {
     margin-right: 35px;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .settingsServerCode:not([valid]) > .settingsServerCodeContent > .settingsServerCodeMainWrapper > .settingsServerCodeDetails > .settingsServerCodeServerNamesContent > .settingsServerCodeServerName {
