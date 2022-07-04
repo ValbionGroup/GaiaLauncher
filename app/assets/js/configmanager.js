@@ -87,7 +87,8 @@ const DEFAULT_CONFIG = {
             resHeight: 720,
             fullscreen: false,
             autoConnect: true,
-            launchDetached: true
+            launchDetached: true,
+            consoleOnLaunch: false
         },
         launcher: {
             allowPrerelease: false,
@@ -719,6 +720,25 @@ exports.getLaunchDetached = function(def = false){
  */
 exports.setLaunchDetached = function(launchDetached){
     config.settings.game.launchDetached = launchDetached
+}
+
+/**
+ * Check if the game should open the devtools console on launch
+ *
+ * @param {boolean} def Optional. If true, the default value will be returned.
+ * @returns {boolean} Whether or not to open the devtools console on launch
+ */
+ exports.getConsoleOnLaunch = function(def = false){
+    return !def ? config.settings.game.consoleOnLaunch : DEFAULT_CONFIG.settings.game.consoleOnLaunch
+}
+
+/**
+ * Change the status of whether or not the devtools console should open on launch
+ *
+ * @param {boolean} consoleOnLaunch whether or not to open the devtools console on launch
+ */
+exports.setConsoleOnLaunch = function(consoleOnLaunch){
+    config.settings.game.consoleOnLaunch = consoleOnLaunch
 }
 
 // Launcher Settings
