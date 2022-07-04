@@ -1,4 +1,3 @@
-// Work in progress
 const logger = require('./loggerutil')('%c[DiscordWrapper]', 'color: #7289da; font-weight: bold')
 
 const {Client} = require('discord-rpc-patch')
@@ -6,7 +5,7 @@ const {Client} = require('discord-rpc-patch')
 let client
 let activity
 
-exports.initRPC = function(genSettings, servSettings, initialDetails = 'Waiting for Client..'){
+exports.initRPC = function(genSettings, initialDetails = 'Attente du client..'){
     client = new Client({ transport: 'ipc' })
 
     activity = {
@@ -47,6 +46,33 @@ exports.clearState = function(){
     }
     client.setActivity(activity)
     logger.log('Cleared the activity state!')
+}
+
+exports.startGamePresence = function(genSettings, servSettings){
+    activity = {
+        details: 'Chargement du jeu...',
+        state: '> Sur ' + servSettings.shortId,
+        largeImageKey: servSettings.largeImageKey,
+        largeImageText: servSettings.largeImageText,
+        smallImageKey: genSettings.smallImageKey,
+        smallImageText: genSettings.smallImageText,
+        startTimestamp: new Date().getTime(),
+        instance: activity.instance
+    }
+    client.setActivity(activity)
+    logger.log('Started game presence!')
+}
+
+exports.stopGamePresence = function(genSettings, initialDetails){
+    activity = {
+        details: initialDetails,
+        largeImageKey: genSettings.smallImageKey,
+        largeImageText: genSettings.smallImageText,
+        startTimestamp: new Date().getTime(),
+        instance: activity.instance
+    }
+    client.setActivity(activity)
+    logger.log('Cleared the game activity!')
 }
 
 exports.updateDetails = function(details){

@@ -121,6 +121,7 @@ function toggleServerSelection(toggleState){
     prepareServerSelectionList()
     toggleOverlay(toggleState, true, 'serverSelectContent')
     DiscordWrapper.updateDetails('Sélectionne un serveur...')
+    DiscordWrapper.clearState()
 }
 
 /**
