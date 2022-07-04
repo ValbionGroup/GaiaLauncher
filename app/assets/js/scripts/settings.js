@@ -220,7 +220,7 @@ let selectedSettingsTab = 'settingsTabAccount'
 
 /**
  * Modify the settings container UI when the scroll threshold reaches
- * a certain poin.
+ * a certain point.
  * 
  * @param {UIEvent} e The scroll event.
  */
@@ -423,8 +423,8 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
                         // Uh oh.
                         msftLoginLogger.error('Unhandled error during login.', displayableError)
                         actualDisplayableError = {
-                            title: 'Unknown Error During Login',
-                            desc: 'An unknown error has occurred. Please see the console for details.'
+                            title: 'Erreur inconnue pendant la connexion',
+                            desc: 'Une erreur inconnue s\'est produite. Veuillez consulter la console pour plus de détails.'
                         }
                     }
 
@@ -454,11 +454,11 @@ function bindAuthAccountSelect(){
             for(let i=0; i<selectBtns.length; i++){
                 if(selectBtns[i].hasAttribute('selected')){
                     selectBtns[i].removeAttribute('selected')
-                    selectBtns[i].innerHTML = 'Select Account'
+                    selectBtns[i].innerHTML = 'Choisir un compte'
                 }
             }
             val.setAttribute('selected', '')
-            val.innerHTML = 'Selected Account &#10004;'
+            val.innerHTML = 'Compte sélectionné &#10004;'
             setSelectedAccount(val.closest('.settingsAuthAccount').getAttribute('uuid'))
         }
     })
@@ -548,8 +548,8 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGOUT, (_, ...arguments_) => {
 
             // Unexpected error.
             setOverlayContent(
-                'Something Went Wrong',
-                'Microsoft logout failed. Please try again.',
+                'Quelque chose n\'a pas marché',
+                'La déconnexion de Microsoft a échoué. Veuillez réessayer.',
                 'OK'
             )
             setOverlayHandler(() => {
@@ -604,12 +604,12 @@ function refreshAuthAccountSelected(uuid){
         const selBtn = val.getElementsByClassName('settingsAuthAccountSelect')[0]
         if(uuid === val.getAttribute('uuid')){
             selBtn.setAttribute('selected', '')
-            selBtn.innerHTML = 'Selected Account &#10004;'
+            selBtn.innerHTML = 'Compte sélectionné &#10004;'
         } else {
             if(selBtn.hasAttribute('selected')){
                 selBtn.removeAttribute('selected')
             }
-            selBtn.innerHTML = 'Select Account'
+            selBtn.innerHTML = 'Choisir le compte'
         }
     })
 }
