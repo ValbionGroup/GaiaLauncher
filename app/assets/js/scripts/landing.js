@@ -85,30 +85,32 @@ function setLaunchEnabled(val){
 
 // Bind launch button
 document.getElementById('launch_button').addEventListener('click', function(e){
-    if(ConfigManager.getConsoleOnLaunch()){
-        let window = remote.getCurrentWindow()
-        window.toggleDevTools()
-    }
-    loggerLanding.log('Launching game..')
-    const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
-    const jExe = ConfigManager.getJavaExecutable()
-    if(jExe == null){
-        asyncSystemScan(mcVersion)
-    } else {
+    if(checkCurrentServer(true)){
+        if(ConfigManager.getConsoleOnLaunch()){
+            let window = remote.getCurrentWindow()
+            window.toggleDevTools()
+        }
+        loggerLanding.log('Launching game..')
+        const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
+        const jExe = ConfigManager.getJavaExecutable()
+        if(jExe == null){
+            asyncSystemScan(mcVersion)
+        } else {
 
-        setLaunchDetails(Lang.queryJS('landing.launch.pleaseWait'))
-        toggleLaunchArea(true)
-        setLaunchPercentage(0, 100)
+            setLaunchDetails(Lang.queryJS('landing.launch.pleaseWait'))
+            toggleLaunchArea(true)
+            setLaunchPercentage(0, 100)
 
-        const jg = new JavaGuard(mcVersion)
-        jg._validateJavaBinary(jExe).then((v) => {
-            loggerLanding.log('Java version meta', v)
-            if(v.valid){
-                dlAsync()
-            } else {
-                asyncSystemScan(mcVersion)
-            }
-        })
+            const jg = new JavaGuard(mcVersion)
+            jg._validateJavaBinary(jExe).then((v) => {
+                loggerLanding.log('Java version meta', v)
+                if(v.valid){
+                    dlAsync()
+                } else {
+                    asyncSystemScan(mcVersion)
+                }
+            })
+        }
     }
 })
 
@@ -682,15 +684,15 @@ function dlAsync(login = true){
                 let pb = new ProcessBuilder(serv, versionData, forgeData, authUser, remote.app.getVersion())
                 setLaunchDetails('Lancement du jeu...')
 
-                // const SERVER_JOINED_REGEX = /\[.+\]: \[CHAT\] [a-zA-Z0-9_]{1,16} joined the game/
-                const SERVER_JOINED_REGEX = new RegExp(`\\[.+\\]: \\[CHAT\\] ${authUser.displayName} joined the game`)
+                const SERVER_JOINED_REGEX = new RegExp(`\\[.+\\]: \\[CHAT\\] ${authUser.displayName} has joined!`)
+                const SERVER_LEAVE_REGEX = new RegExp(`\\[.+\\]: \\[CHAT\\] ${authUser.displayName} has left!`)
 
                 const onLoadComplete = () => {
                     toggleLaunchArea(false)
                     if(hasRPC){
-                        DiscordWrapper.updateDetails('Chargement du jeu...')
-                        DiscordWrapper.resetTime()
+                        DiscordWrapper.startGamePresence(DistroManager.getDistribution().discord, serv.discord)
                     }
+                    gameCrashReportListener()
                     proc.stdout.on('data', gameStateChange)
                     proc.stdout.removeListener('data', tempListener)
                     proc.stderr.removeListener('data', gameErrorListener)
@@ -715,10 +717,35 @@ function dlAsync(login = true){
                 // Listener for Discord RPC.
                 const gameStateChange = function(data){
                     data = data.trim()
-                    if(SERVER_JOINED_REGEX.test(data)){
+                    if(GAME_LAUNCH_REGEX.test(data)){
                         DiscordWrapper.updateDetails('Explore le monde !')
                         DiscordWrapper.resetTime()
                     }
+                }
+
+                // Listener for Crash Reports.
+                const gameCrashReportListener = function(){
+                    const watcher = chokidar.watch(path.join(ConfigManager.getInstanceDirectory(), serv.getID(), 'crash-reports'), {
+                        persistent: true,
+                        ignoreInitial: true
+                    })
+
+                    watcher.on('add', path => {
+                        shell.showItemInFolder(path)
+                        setOverlayContent(
+                            'Le jeu s\'est arrêté !',
+                            'Oh oh ! Il semble que votre jeu vienne de crasher. Nous avons ouvert le dossier des rapports de crash afin que vous puissiez facilement le partager avec notre équipe. Si vous avez des crashs répétés, nous vous recommandons toujours de venir nous voir sur <a href="https://github.com/ValbionGroup/GaiaLauncher">Github !</a><br><br>Pour référence future, l\'emplacement du fichier de votre rapport de crash est le suivant : <br>' + path,
+                            'Ok, merci !',
+                            'Ouvrir le rapport de crash'
+                        )
+                        setOverlayHandler(() => {
+                            toggleOverlay(false)
+                        })
+                        setDismissHandler(() => {
+                            shell.openPath(path)
+                        })
+                        toggleOverlay(true, true)
+                    })
                 }
 
                 const gameErrorListener = function(data){
@@ -741,24 +768,11 @@ function dlAsync(login = true){
                     proc.on('close', (code, signal) => {
                         if(hasRPC){
                             const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
-                            DiscordWrapper.updateDetails('Prêt à jouer !')
+                            DiscordWrapper.stopGamePresence(DistroManager.getDistribution().discord, "Le jeu a été arrêté.")
+                            DiscordWrapper.updateDetails('Prêt à jouer')
                             DiscordWrapper.updateState('> Sur ' + serv.getName())
-                            DiscordWrapper.resetTime()
                         }
                     })
-
-                    // Init Discord Hook
-                    const distro = DistroManager.getDistribution()
-                    if(distro.discord != null && serv.discord != null){
-                        DiscordWrapper.initRPC(distro.discord, serv.discord)
-                        hasRPC = true
-                        proc.on('close', (code, signal) => {
-                            loggerLaunchSuite.log('Shutting down Discord Rich Presence..')
-                            DiscordWrapper.shutdownRPC()
-                            hasRPC = false
-                            proc = null
-                        })
-                    }
 
                 } catch(err) {
 
@@ -802,6 +816,39 @@ function dlAsync(login = true){
             }
         })
     })
+}
+
+/**
+ * Checks the current server to ensure that they still have permission to play it (checking server code, if applicable) and open up an error overlay if specified
+ * @Param {boolean} whether or not to show the error overlay
+ */
+ function checkCurrentServer(errorOverlay = true){
+    const selectedServId = ConfigManager.getSelectedServer()
+    if(selectedServId){
+        const selectedServ = DistroManager.getDistribution().getServer(selectedServId)
+        if(selectedServ){
+            if(selectedServ.getServerCode() && selectedServ.getServerCode() !== ''){
+                if(!ConfigManager.getServerCodes().includes(selectedServ.getServerCode())){
+                    if(errorOverlay){
+                        setOverlayContent(
+                            'Serveur actuel restreint !',
+                            'Il semble que vous n\'ayez plus le code serveur requis pour accéder à ce serveur ! Veuillez passer à un autre serveur pour jouer.<br><br>Si vous pensez qu\'il s\'agit d\'une erreur, veuillez contacter l\'administrateur du serveur.',
+                            'Changer de serveur'
+                        )
+                        setOverlayHandler(() => {
+                            toggleServerSelection(true)
+                        })
+                        setDismissHandler(() => {
+                            toggleOverlay(false)
+                        })
+                        toggleOverlay(true, true)
+                    }
+                    return false
+                }
+            }
+        }
+        return true
+    }
 }
 
 /**
