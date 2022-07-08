@@ -90,11 +90,11 @@ async function fullMicrosoftAuthFlow(entryCode, authMode) {
         if(xblResponse.responseStatus === RestResponseStatus.ERROR) {
             return Promise.reject(microsoftErrorDisplayable(xblResponse.microsoftErrorCode))
         }
-        const xstsResonse = await MicrosoftAuth.getXSTSToken(xblResponse.data)
-        if(xstsResonse.responseStatus === RestResponseStatus.ERROR) {
-            return Promise.reject(microsoftErrorDisplayable(xstsResonse.microsoftErrorCode))
+        const xstsResponse = await MicrosoftAuth.getXSTSToken(xblResponse.data)
+        if(xstsResponse.responseStatus === RestResponseStatus.ERROR) {
+            return Promise.reject(microsoftErrorDisplayable(xstsResponse.microsoftErrorCode))
         }
-        const mcTokenResponse = await MicrosoftAuth.getMCAccessToken(xstsResonse.data)
+        const mcTokenResponse = await MicrosoftAuth.getMCAccessToken(xstsResponse.data)
         if(mcTokenResponse.responseStatus === RestResponseStatus.ERROR) {
             return Promise.reject(microsoftErrorDisplayable(mcTokenResponse.microsoftErrorCode))
         }
@@ -106,7 +106,7 @@ async function fullMicrosoftAuthFlow(entryCode, authMode) {
             accessToken,
             accessTokenRaw,
             xbl: xblResponse.data,
-            xsts: xstsResonse.data,
+            xsts: xstsResponse.data,
             mcToken: mcTokenResponse.data,
             mcProfile: mcProfileResponse.data
         }
@@ -121,11 +121,11 @@ async function fullMicrosoftAuthFlow(entryCode, authMode) {
  * to reduce the liklihood of working with an expired token.
  * 
  * @param {number} nowMs Current time milliseconds.
- * @param {number} epiresInS Expires in (seconds)
+ * @param {number} expiresInS Expires in (seconds)
  * @returns 
  */
-function calculateExpiryDate(nowMs, epiresInS) {
-    return nowMs + ((epiresInS-10)*1000)
+function calculateExpiryDate(nowMs, expiresInS) {
+    return nowMs + ((expiresInS-10)*1000)
 }
 
 /**
