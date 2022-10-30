@@ -223,8 +223,10 @@ let win
 function createWindow() {
 
     win = new BrowserWindow({
-        width: 980,
-        height: 552,
+        width: 1200,
+        height: 650,
+        minWidth: 1200,
+        minHeight: 650,
         icon: getPlatformIcon('ico'),
         frame: false,
         webPreferences: {
