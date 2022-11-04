@@ -11,8 +11,6 @@
     transition: all .2s;
     -webkit-user-select: none;
 
-    .account-side {}
-
     .box {
         position: absolute;
         left: 18px;
@@ -99,6 +97,16 @@
                     content: "Fermer";
                 }
 
+                .update-available {
+                    display: none;
+                }
+
+                &.close {
+                    .update-available {
+                        display: flex !important;
+                    }
+                }
+
                 &.close:hover:after {
                     content: attr(aria-label);
                 }
@@ -108,6 +116,10 @@
                 color: var(--icon-active);
                 background-color: var(--box-button-gradient-1);
                 background-image: linear-gradient(145deg, var(--box-button-gradient-1) 0%, var(--box-button-gradient-2) 100%);
+
+                .update-available {
+                    display: none;
+                }
             }
 
             &:before {
@@ -139,7 +151,53 @@
                 font-size: 30px;
                 animation: settingsClose .2s linear;
             }
+
+            .update-available {
+                position: absolute;
+                top: 0px;
+                right: 0px;
+                width: 12px;
+                height: 12px;
+                border: 2px solid var(--background);
+                background-color: var(--color);
+                transition: color .2s, background-color .2s;
+                border-radius: 16px;
+
+                &:after,
+                &:before {
+                    position: absolute;
+                    content: "";
+                    height: 100%;
+                    width: 100%;
+                    top: 0%;
+                    left: 0%;
+                    border-radius: 50%;
+                    box-shadow: 0 0 15px var(--color);
+                    animation: glow-grow 4s ease-out infinite;
+                    background: rgba(0, 0, 0, 0.15);
+                }
+
+                &:before {
+                    animation-delay: 2s;
+                }
+            }
         }
+    }
+}
+
+@keyframes glow-grow {
+    0% {
+        opacity: 0;
+        transform: scale(1);
+    }
+
+    80% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
     }
 }
 
