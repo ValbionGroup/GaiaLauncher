@@ -5,6 +5,13 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'Icons2';
+    src: url('../fonts/Icons2.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
 [class^="icon-"]:before,
 [class*=" icon-"]:before,
 [class^="icon-"]:after,
@@ -107,32 +114,130 @@
     content: "\e909";
 }
 
-.icon-twitter:before {
-    font-family: "Brand";
+.icon-launcher:before {
+    font-family: "Icons2";
     content: "\e900";
+    font-weight: 600;
 }
 
-.icon-teamspeak:before {
-    font-family: "Brand";
-    content: "\e901";
-}
-
-.icon-discord:before {
-    font-family: "Brand";
+.icon-update:before {
+    font-family: "Icons2";
     content: "\e902";
 }
 
-.icon-instagram:before {
-    font-family: "Brand";
+.icon-mods:before {
+    font-family: "Icons2";
     content: "\e903";
+    font-weight: 800;
 }
 
-.icon-youtube:before {
-    font-family: "Brand";
+.icon-link:before {
+    font-family: "Icons2";
     content: "\e904";
 }
 
-.icon-paladium:before {
-    font-family: "Brand";
+.icon-wiki:before {
+    font-family: "Icons2";
+    content: "\e901";
+}
+
+.icon-switchServer:before {
+    font-family: "Icons2";
     content: "\e905";
+}
+
+.icon-youtube:before {
+    font-family: "Icons2";
+    content: "\e908";
+}
+
+.icon-instagram:before {
+    font-family: "Icons2";
+    content: "\e909";
+}
+
+.icon-twitter:before {
+    font-family: "Icons2";
+    content: "\e906";
+}
+
+.icon-discord:before {
+    font-family: "Icons2";
+    content: "\e907";
+}
+
+.icon-mojang .path1:before {
+    font-family: "Icons2";
+    content: "\e90e";
+    color: rgb(239, 50, 61);
+}
+
+.icon-mojang .path2:before {
+    font-family: "Icons2";
+    content: "\e90f";
+    margin-left: -1.2109375em;
+    color: rgb(255, 255, 255);
+}
+
+.icon-mojang .path3:before {
+    font-family: "Icons2";
+    content: "\e913";
+    margin-left: -1.2109375em;
+    color: rgb(255, 255, 255);
+}
+
+.icon-mojang .path4:before {
+    font-family: "Icons2";
+    content: "\e914";
+    margin-left: -1.2109375em;
+    color: rgb(255, 255, 255);
+}
+
+.icon-mojang .path5:before {
+    font-family: "Icons2";
+    content: "\e915";
+    margin-left: -1.2109375em;
+    color: rgb(255, 255, 255);
+}
+
+.icon-microsoft .path1:before {
+    font-family: "Icons2";
+    content: "\e90a";
+    color: rgb(243, 83, 37);
+}
+
+.icon-microsoft .path2:before {
+    font-family: "Icons2";
+    content: "\e90b";
+    margin-left: -1em;
+    color: rgb(129, 188, 6);
+}
+
+.icon-microsoft .path3:before {
+    font-family: "Icons2";
+    content: "\e90c";
+    margin-left: -1em;
+    color: rgb(5, 166, 240);
+}
+
+.icon-microsoft .path4:before {
+    font-family: "Icons2";
+    content: "\e90d";
+    margin-left: -1em;
+    color: rgb(255, 186, 8);
+}
+
+.icon-warning:before {
+    font-family: "Icons2";
+    content: '\e910';
+}
+
+.icon-refresh:before {
+    font-family: "Icons2";
+    content: '\e912';
+}
+
+.icon-check:before {
+    font-family: "Icons2";
+    content: '\e911';
 }
