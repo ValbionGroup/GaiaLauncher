@@ -1,6 +1,6 @@
 {
   "name": "gaialauncher",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "productName": "Gaïa Launcher",
   "description": "Modded Minecraft Launcher",
   "author": "Valbion Group",
@@ -33,7 +33,7 @@
     "fs-extra": "^10.1.0",
     "github-syntax-dark": "^0.5.0",
     "got": "^11.8.3",
-    "helios-core": "~0.1.0",
+    "helios-core": "~0.1.2",
     "jquery": "^3.6.0",
     "node-stream-zip": "^1.15.0",
     "request": "^2.88.2",
