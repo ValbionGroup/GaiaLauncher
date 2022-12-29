@@ -1,0 +1,41 @@
+=== GAIA LAUNCHER ===é
+By Gaia Studio (Valbion Group)
+
+L'UTILISATION DU LAUNCHER NE DOIT CE FAIRE UNIQUEMENT DANS LE RESPECT DES REGLES CI-DESSOUS.
+
+
+Propriete intellectuelle :
+Gaia Launcher est un logiciel fournis par Gaia Studio, filliale de Valbion SAS.
+Minecraft est un produit de la societe Mojang AB.
+Microsoft Live appartient a la societe Microsoft Inc.
+Gaia Launcher n'est pas affilie avec Mojang AB ou Microsoft Inc.
+
+Application des conditions :
+Les presentes conditions generales regissent l'utilisation de ce service et constituent l'accord entre vous et la societe. Ces conditions generales definissent les droits et obligations de tous les utilisateurs concernant l'utilisation du service.
+
+Votre acces et votre utilisation du service sont conditionnes par votre acceptation et votre respect des presentes conditions generales. Ces conditions generales s'appliquent a tous les visiteurs, utilisateurs et autres personnes qui accedent ou utilisent le service.
+
+En accedant au service ou en l'utilisant, vous acceptez d'etre lie par les presentes conditions generales. Si vous n'etes pas d'accord avec une partie quelconque de ces conditions, vous ne pouvez pas acceder au service.
+
+Votre acces au Service et son utilisation sont egalement conditionnes par votre acceptation et votre respect de la Politique de confidentialite de la Societe. Notre Politique de confidentialite decrit Nos politiques et procedures en matiere de collecte, d'utilisation et de divulgation de Vos informations personnelles lorsque Vous utilisez l'Application ou le Site Internet et Vous informe de Vos droits en matiere de confidentialite et de la maniere dont la loi Vous protege. Veuillez lire attentivement notre politique de confidentialite avant d'utiliser notre service.
+
+Liens vers d'autres sites web :
+Notre Service peut contenir des liens vers des sites Web ou des services de tiers qui ne sont pas detenus ou contrôles par la Societe.
+
+La Societe n'a aucun contrôle et n'assume aucune responsabilite quant au contenu, aux politiques de confidentialite ou aux pratiques de tout site Web ou service tiers. Vous reconnaissez et acceptez en outre que la Societe ne peut etre tenue responsable, directement ou indirectement, de tout dommage ou perte cause ou suppose etre cause par ou en relation avec l'utilisation ou la confiance accordee a un tel contenu, biens ou services disponibles sur ou par le biais de ces sites Web ou services.
+
+Nous vous conseillons vivement de lire les conditions generales et les politiques de confidentialite de tout site Web ou service tiers que vous visitez.
+
+Limitation de la responsabilite :
+Nonobstant tout dommage que vous pourriez subir, l'entiere responsabilite de la Societe et de ses fournisseurs en vertu de toute disposition des presentes Conditions et votre recours exclusif pour tout ce qui precede sera limite au montant effectivement paye par vous par le biais du Service ou 100 USD si vous n'avez rien achete par le biais du Service.
+
+Dans la mesure maximale autorisee par la loi applicable, la Societe ou ses fournisseurs ne seront en aucun cas responsables de tout dommage special, accessoire, indirect ou consecutif quel qu'il soit (y compris, mais sans s'y limiter, les dommages pour perte de profits, perte de donnees ou d'autres informations, pour interruption d'activite, pour prejudice personnel, perte de vie privee decoulant de ou liee de quelque maniere que ce soit a l'utilisation ou a l'incapacite d'utiliser le service, les logiciels de tiers et/ou le materiel de tiers utilises avec le service, ou autrement en rapport avec toute disposition des presentes conditions), meme si la societe ou tout fournisseur a ete informe de la possibilite de tels dommages et meme si le remede ne remplit pas son objectif essentiel.
+
+Certains etats n'autorisent pas l'exclusion des garanties implicites ou la limitation de la responsabilite pour les dommages accessoires ou indirects, ce qui signifie que certaines des limitations ci-dessus peuvent ne pas s'appliquer. Dans ces etats, la responsabilite de chaque partie sera limitee dans toute la mesure permise par la loi.
+
+Clause de non-responsabilite "EN L'eTAT" et "COMME DISPONIBLE" :
+Le service vous est fourni "TEL QUEL" et "TEL QUE DISPONIBLE", avec tous les defauts et toutes les defaillances, sans garantie d'aucune sorte. Dans toute la mesure permise par la loi applicable, la societe, en son propre nom et au nom de ses societes affiliees et de leurs concedants de licence et fournisseurs de services respectifs, decline expressement toute garantie, qu'elle soit expresse, implicite, statutaire ou autre, concernant le service, y compris toutes les garanties implicites de qualite marchande, d'adequation a un usage particulier, de titre et d'absence de contrefaçon, ainsi que les garanties pouvant decouler de la conduite habituelle des affaires, des performances, des usages ou des pratiques commerciales. Sans limitation de ce qui precede, la Societe ne fournit aucune garantie ou engagement, et ne fait aucune declaration de quelque nature que ce soit selon laquelle le Service repondra a vos exigences, atteindra les resultats escomptes, sera compatible ou fonctionnera avec tout autre logiciel, application, systeme ou service, fonctionnera sans interruption, repondra a toute norme de performance ou de fiabilite ou sera exempt d'erreur ou que toute erreur ou tout defaut peut etre ou sera corrige.
+
+Sans limiter ce qui precede, ni la Societe ni aucun de ses fournisseurs ne font de declaration ou de garantie de quelque nature que ce soit, expresse ou implicite : (i) quant au fonctionnement ou a la disponibilite du service, ou aux informations, au contenu et aux materiaux ou produits qui y sont inclus ; (ii) quant au fait que le service sera ininterrompu ou exempt d'erreurs ; (iii) quant a l'exactitude, la fiabilite ou l'actualite des informations ou du contenu fournis par le biais du service ; ou (iv) quant au fait que le service, ses serveurs, le contenu ou les e-mails envoyes par la societe ou en son nom sont exempts de virus, de scripts, de chevaux de Troie, de vers, de logiciels malveillants, de bombes a retardement ou d'autres composants nuisibles.
+
+Certaines juridictions n'autorisent pas l'exclusion de certains types de garanties ou la limitation des droits statutaires applicables d'un consommateur, de sorte que tout ou partie des exclusions et limitations ci-dessus peuvent ne pas s'appliquer a vous. Mais dans un tel cas, les exclusions et limitations enoncees dans la presente section seront appliquees dans toute la mesure permise par la loi applicable.
