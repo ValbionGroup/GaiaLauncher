@@ -5,13 +5,33 @@
 const cp                      = require('child_process')
 const crypto                  = require('crypto')
 const { URL }                 = require('url')
-const { MojangRestAPI, getServerStatus }     = require('helios-core/mojang')
-const { LoggerUtil }         = require('helios-core')
+const {
+    MojangRestAPI,
+    getServerStatus
+}                             = require('helios-core/mojang')
+const {
+    RestResponseStatus,
+    isDisplayableError,
+    validateLocalFile
+}                             = require('helios-core/common')
+const {
+    FullRepair,
+    DistributionIndexProcessor,
+    MojangIndexProcessor,
+    downloadFile
+}                             = require('helios-core/dl')
+const {
+    validateSelectedJvm,
+    ensureJavaDirIsRoot,
+    javaExecFromRoot,
+    discoverBestJvmInstallation,
+    latestOpenJDK,
+    extractJdk
+}                             = require('helios-core/java')
 
 // Internal Requirements
 const DiscordWrapper          = require('./assets/js/discordwrapper')
 const ProcessBuilder          = require('./assets/js/processbuilder')
-const { RestResponseStatus, isDisplayableError } = require('helios-core/common')
 
 // Launch Elements
 const launch_content          = document.getElementById('launch_content')
@@ -22,7 +42,7 @@ const launch_details_text     = document.getElementById('launch_details_text')
 const server_selection_button = document.getElementById('server_selection_button')
 const user_text               = document.getElementById('user_text')
 
-const loggerLanding = LoggerUtil('Landing')
+const loggerLanding = new LoggerUtil('Landing')
 
 /* Launch Progress Wrapper Functions */
 
@@ -85,14 +105,14 @@ function setLaunchEnabled(val){
 }
 
 // Bind launch button
-document.getElementById('launch_button').addEventListener('click', function(e){
+document.getElementById('launch_button').addEventListener('click', async function(e){
     if(checkCurrentServer(true)){
         if(ConfigManager.getConsoleOnLaunch()){
             let window = remote.getCurrentWindow()
             window.toggleDevTools()
         }
-        loggerLanding.log('Launching game..')
-        const mcVersion = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion()
+        loggerLanding.info('Launching game..')
+        const mcVersion = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer()).getMinecraftVersion()
         const jExe = ConfigManager.getJavaExecutable()
         if(jExe == null){
             asyncSystemScan(mcVersion)
@@ -104,7 +124,7 @@ document.getElementById('launch_button').addEventListener('click', function(e){
 
             const jg = new JavaGuard(mcVersion)
             jg._validateJavaBinary(jExe).then((v) => {
-                loggerLanding.log('Java version meta', v)
+                loggerLanding.info('Java version meta', v)
                 if(v.valid){
                     dlAsync()
                 } else {
@@ -153,9 +173,9 @@ function updateSelectedServer(serv){
     if(getCurrentView() === VIEWS.settings){
         saveAllModConfigurations()
     }
-    ConfigManager.setSelectedServer(serv != null ? serv.getID() : null)
+    ConfigManager.setSelectedServer(serv != null ? serv.rawServer.id : null)
     ConfigManager.save()
-    server_selection_button.innerHTML = '\u2022 ' + (serv != null ? serv.getName() : 'No Server Selected')
+    server_selection_button.innerHTML = '\u2022 ' + (serv != null ? serv.rawServer.name : 'No Server Selected')
     if(getCurrentView() === VIEWS.settings){
         animateModsTabRefresh()
     }
@@ -170,7 +190,7 @@ server_selection_button.onclick = (e) => {
 
 // Update Mojang Status Color
 const refreshMojangStatuses = async function(){
-    loggerLanding.log('Refreshing Mojang Statuses..')
+    loggerLanding.info('Refreshing Mojang Statuses..')
 
     let status = 'grey'
     let tooltipEssentialHTML = ''
@@ -230,14 +250,14 @@ const refreshMojangStatuses = async function(){
 }
 
 const refreshServerStatus = async function(fade = false){
-    loggerLanding.log('Refreshing Server Status')
-    const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
+    loggerLanding.info('Refreshing Server Status')
+    const serv = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
 
     let pLabel = 'SERVEUR'
     let pVal = 'OFFLINE'
 
     try {
-        const serverURL = new URL('my://' + serv.getAddress())
+        const serverURL = new URL('my://' + serv.rawServer.address)
 
         const servStat = await getServerStatus(47, serverURL.hostname, Number(serverURL.port))
         console.log(servStat)
@@ -263,10 +283,10 @@ const refreshServerStatus = async function(fade = false){
 
 function loadDiscord(){
     if(!ConfigManager.getDiscordIntegration()) return
-    const distro = DistroManager.getDistribution()
+    const distro = DistroAPI.getDistribution()
     const serv = distro.getServer(ConfigManager.getSelectedServer())
 
-    loggerLanding.log('Now loading DiscordRPC')
+    loggerLanding.info('Now loading DiscordRPC')
     if(!hasRPC){
         if(distro.discord != null){
             DiscordWrapper.initRPC(distro.discord, serv.discord, 'Page d\'accueil')
@@ -277,7 +297,7 @@ function loadDiscord(){
         if(hasRPC){
             if(serv){
                 DiscordWrapper.updateDetails('Prêt à jouer !')
-                DiscordWrapper.updateState('> Sur ' + serv.getName())
+                DiscordWrapper.updateState('> Sur ' + serv.rawServer.name)
             } else {
                 DiscordWrapper.updateDetails('Page d\'accueil')
             }
@@ -328,7 +348,7 @@ function asyncSystemScan(mcVersion, launchAfter = true){
     toggleLaunchArea(true)
     setLaunchPercentage(0, 100)
 
-    const loggerSysAEx = LoggerUtil('SysAEx')
+    const loggerSysAEx = new LoggerUtil('SysAEx')
 
     const forkEnv = JSON.parse(JSON.stringify(process.env))
     forkEnv.CONFIG_DIRECT_PATH = ConfigManager.getLauncherDirectory()
@@ -530,8 +550,8 @@ function dlAsync(login = true){
     toggleLaunchArea(true)
     setLaunchPercentage(0, 100)
 
-    const loggerAEx = LoggerUtil('AEx')
-    const loggerLaunchSuite = LoggerUtil('LaunchSuite')
+    const loggerAEx = new LoggerUtil('AEx')
+    const loggerLaunchSuite = new LoggerUtil('LaunchSuite')
 
     const forkEnv = JSON.parse(JSON.stringify(process.env))
     forkEnv.CONFIG_DIRECT_PATH = ConfigManager.getLauncherDirectory()
@@ -691,7 +711,7 @@ function dlAsync(login = true){
                 const onLoadComplete = () => {
                     toggleLaunchArea(false)
                     if(hasRPC){
-                        DiscordWrapper.startGamePresence(DistroManager.getDistribution().discord, serv.discord)
+                        DiscordWrapper.startGamePresence(DistroAPI.getDistribution().discord, serv.discord)
                     }
                     gameCrashReportListener()
                     proc.stdout.on('data', gameStateChange)
@@ -726,7 +746,7 @@ function dlAsync(login = true){
 
                 // Listener for Crash Reports.
                 const gameCrashReportListener = function(){
-                    const watcher = chokidar.watch(path.join(ConfigManager.getInstanceDirectory(), serv.getID(), 'crash-reports'), {
+                    const watcher = chokidar.watch(path.join(ConfigManager.getInstanceDirectory(), serv.rawServer.id, 'crash-reports'), {
                         persistent: true,
                         ignoreInitial: true
                     })
@@ -766,12 +786,12 @@ function dlAsync(login = true){
                     proc.stderr.on('data', gameErrorListener)
 
                     setLaunchDetails('Terminé. Profitez du serveur !')
-                    proc.on('close', (code, signal) => {
+                    proc.on('close', async (code, signal) => {
                         if(hasRPC){
-                            const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
-                            DiscordWrapper.stopGamePresence(DistroManager.getDistribution().discord, "Le jeu a été arrêté.")
+                            const serv = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
+                            DiscordWrapper.stopGamePresence(DistroAPI.getDistribution().discord, "Le jeu a été arrêté.")
                             DiscordWrapper.updateDetails('Prêt à jouer')
-                            DiscordWrapper.updateState('> Sur ' + serv.getName())
+                            DiscordWrapper.updateState('> Sur ' + serv.rawServer.name)
                         }
                     })
 
@@ -797,23 +817,23 @@ function dlAsync(login = true){
     refreshDistributionIndex(true, (data) => {
         onDistroRefresh(data)
         serv = data.getServer(ConfigManager.getSelectedServer())
-        aEx.send({task: 'execute', function: 'validateEverything', argsArr: [ConfigManager.getSelectedServer(), DistroManager.isDevMode()]})
+        aEx.send({task: 'execute', function: 'validateEverything', argsArr: [ConfigManager.getSelectedServer(), DistroAPI.isDevMode()]})
     }, (err) => {
         loggerLaunchSuite.log('Error while fetching a fresh copy of the distribution index.', err)
         refreshDistributionIndex(false, (data) => {
             onDistroRefresh(data)
             serv = data.getServer(ConfigManager.getSelectedServer())
-            aEx.send({task: 'execute', function: 'validateEverything', argsArr: [ConfigManager.getSelectedServer(), DistroManager.isDevMode()]})
+            aEx.send({task: 'execute', function: 'validateEverything', argsArr: [ConfigManager.getSelectedServer(), DistroAPI.isDevMode()]})
         }, (err) => {
             loggerLaunchSuite.error('Unable to refresh distribution index.', err)
-            if(DistroManager.getDistribution() == null){
+            if(DistroAPI.getDistribution() == null){
                 showLaunchFailure('Fatal Error', 'Impossible de charger une copie de l\'index de distribution. Consultez la console (CTRL + Shift + i) pour plus de détails.')
 
                 // Disconnect from AssetExec
                 aEx.disconnect()
             } else {
                 serv = data.getServer(ConfigManager.getSelectedServer())
-                aEx.send({task: 'execute', function: 'validateEverything', argsArr: [ConfigManager.getSelectedServer(), DistroManager.isDevMode()]})
+                aEx.send({task: 'execute', function: 'validateEverything', argsArr: [ConfigManager.getSelectedServer(), DistroAPI.isDevMode()]})
             }
         })
     })
@@ -826,7 +846,7 @@ function dlAsync(login = true){
  function checkCurrentServer(errorOverlay = true){
     const selectedServId = ConfigManager.getSelectedServer()
     if(selectedServId){
-        const selectedServ = DistroManager.getDistribution().getServer(selectedServId)
+        const selectedServ = DistroAPI.getDistribution().getServer(selectedServId)
         if(selectedServ){
             if(selectedServ.getServerCode() && selectedServ.getServerCode() !== ''){
                 if(!ConfigManager.getServerCodes().includes(selectedServ.getServerCode())){
@@ -920,16 +940,16 @@ function slide_(up){
 }
 
 // Bind news button.
-document.getElementById('newsButton').onclick = () => {
+document.getElementById('newsButton').onclick = async () => {
     // Toggle tabbing.
     if(newsActive){
         $('#landingContainer *').removeAttr('tabindex')
         $('#newsContainer *').attr('tabindex', '-1')
         if(hasRPC){
             if(ConfigManager.getSelectedServer()){
-                const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
+                const serv = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
                 DiscordWrapper.updateDetails('Prêt à jouer !')
-                DiscordWrapper.updateState('> Sur ' + serv.getName())
+                DiscordWrapper.updateState('> Sur ' + serv.rawServer.name)
             } else {
                 DiscordWrapper.updateDetails('Page d\'accueil')
             }
@@ -1190,7 +1210,7 @@ function displayArticle(articleObject, index){
  */
 function loadNews(){
     return new Promise((resolve, reject) => {
-        const distroData = DistroManager.getDistribution()
+        const distroData = DistroAPI.getDistribution()
         const newsFeed = distroData.getRSS()
         const newsHost = new URL(newsFeed).origin + '/'
         $.ajax({

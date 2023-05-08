@@ -77,7 +77,7 @@ exports.getAbsoluteMaxRAM = function(ram){
     return Math.floor((mem-(gT16 > 0 ? (Number.parseInt(gT16/8) + (16*1073741824)/4) : mem/4))/1073741824)
 }
 
-function resolveMaxRAM(ram){
+function resolveSelectedRAM(ram){
     if(ram?.recommended != null) {
         return `${ram.recommended}M`
     } else {

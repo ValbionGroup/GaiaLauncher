@@ -1,11 +1,10 @@
 // Requirements
 const os     = require('os')
 const semver = require('semver')
-const { LoggerUtil } = require('helios-core')
 
 const DropinModUtil  = require('./assets/js/dropinmodutil')
 const { MSFT_OPCODE, MSFT_REPLY_TYPE, MSFT_ERROR } = require('./assets/js/ipcconstants')
-const loggerSettings = LoggerUtil('Settings')
+const loggerSettings = new LoggerUtil('Settings')
 
 const settingsState = {
     invalid: new Set()
@@ -459,10 +458,10 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
             if(!ConfigManager.getServerCodes().includes(code) && code){
                 ConfigManager.getServerCodes().push(code)
                 ConfigManager.save()
-                loggerSettings.log('Added server code to configuration and saved it')
+                loggerSettings.info('Added server code to configuration and saved it')
                 prepareLauncherTab()
             } else {
-                loggerSettings.log('Server code already exists or is empty, not adding.')
+                loggerSettings.info('Server code already exists or is empty, not adding.')
             }
         }
     }
@@ -476,11 +475,11 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
                 if(ConfigManager.getServerCodes().includes(code)){
                     ConfigManager.getServerCodes().splice(ConfigManager.getServerCodes().indexOf(code), 1)
                     ConfigManager.save()
-                    loggerSettings.log('Added removed code from configuration and saved it')
+                    loggerSettings.info('Added removed code from configuration and saved it')
                     prepareLauncherTab()
                 }
             }
-            loggerSettings.log('Server code doesnt exist!, not removing.')
+            loggerSettings.warn('Server code doesnt exist!, not removing.')
         }
     })
 }
