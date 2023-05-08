@@ -9,12 +9,10 @@ const $                              = require('jquery')
 const {ipcRenderer, shell, webFrame} = require('electron')
 const remote                         = require('@electron/remote')
 const isDev                          = require('./assets/js/isdev')
-const { LoggerUtil }                 = require('helios-core')
-const LoggerUtil1                    = require('./assets/js/loggerutil')
+const { LoggerUtil }                 = require('gaialauncher-core')
 
-const loggerUICore             = LoggerUtil1('%c[UICore]', 'color: #000668; font-weight: bold')
-const loggerAutoUpdater        = LoggerUtil1('%c[AutoUpdater]', 'color: #000668; font-weight: bold')
-const loggerAutoUpdaterSuccess = LoggerUtil1('%c[AutoUpdater]', 'color: #209b07; font-weight: bold')
+const loggerUICore             = LoggerUtil.getLogger('UICore')
+const loggerAutoUpdater        = LoggerUtil.getLogger('AutoUpdater')
 
 // Log deprecation and process warnings.
 process.traceProcessWarnings = true
@@ -43,11 +41,11 @@ if(!isDev){
     ipcRenderer.on('autoUpdateNotification', (event, arg, info) => {
         switch(arg){
             case 'checking-for-update':
-                loggerAutoUpdater.log('Checking for update..')
+                loggerAutoUpdater.info('Checking for update..')
                 settingsUpdateButtonStatus('Recherche de mise à jour...', true)
                 break
             case 'update-available':
-                loggerAutoUpdaterSuccess.log('New update available', info.version)
+                loggerAutoUpdater.info('New update available', info.version)
                 
                 if(process.platform === 'darwin'){
                     info.darwindownload = `https://github.com/ValbionGroup/GaiaLauncher/releases/download/v${info.version}/gaialauncher-setup-${info.version}${process.arch === 'arm64' ? '-arm64' : '-x64'}.dmg`
@@ -57,7 +55,7 @@ if(!isDev){
                 populateSettingsUpdateInformation(info)
                 break
             case 'update-downloaded':
-                loggerAutoUpdaterSuccess.log('Mise à jour ' + info.version + ' prête à être installée.')
+                loggerAutoUpdater.info('Mise à jour ' + info.version + ' prête à être installée.')
                 settingsUpdateButtonStatus('Installer maintenant', false, () => {
                     if(!isDev){
                         ipcRenderer.send('autoUpdateAction', 'installUpdateNow')
@@ -66,7 +64,7 @@ if(!isDev){
                 showUpdateUI(info)
                 break
             case 'update-not-available':
-                loggerAutoUpdater.log('No new update found.')
+                loggerAutoUpdater.info('No new update found.')
                 settingsUpdateButtonStatus('Chercher des mises à jour')
                 break
             case 'ready':
@@ -78,9 +76,9 @@ if(!isDev){
             case 'realerror':
                 if(info != null && info.code != null){
                     if(info.code === 'ERR_UPDATER_INVALID_RELEASE_FEED'){
-                        loggerAutoUpdater.log('No suitable releases found.')
+                        loggerAutoUpdater.info('No suitable releases found.')
                     } else if(info.code === 'ERR_XML_MISSED_ELEMENT'){
-                        loggerAutoUpdater.log('No releases found.')
+                        loggerAutoUpdater.info('No releases found.')
                     } else {
                         loggerAutoUpdater.error('Error during update check..', info)
                         loggerAutoUpdater.debug('Error Code:', info.code)
@@ -88,7 +86,7 @@ if(!isDev){
                 }
                 break
             default:
-                loggerAutoUpdater.log('Unknown argument', arg)
+                loggerAutoUpdater.info('Unknown argument', arg)
                 break
         }
     })
@@ -123,7 +121,7 @@ function showUpdateUI(info){
             toggleOverlay(false)
         })
         toggleOverlay(true, true)*/
-        switchView(getCurrentView(), VIEWS.settings, 250, 250, () => {
+        switchView(getCurrentView(), VIEWS.settings, 500, 500, () => {
             settingsNavItemListener(document.getElementById('settingsNavUpdate'), false)
         })
     }
@@ -131,12 +129,12 @@ function showUpdateUI(info){
 
 /* jQuery Example
 $(function(){
-    loggerUICore.log('UICore Initialized');
+    loggerUICore.info('UICore Initialized');
 })*/
 
 document.addEventListener('readystatechange', function () {
     if (document.readyState === 'interactive'){
-        loggerUICore.log('UICore Initializing..')
+        loggerUICore.info('UICore Initializing..')
 
         // Bind close button.
         Array.from(document.getElementsByClassName('fCb')).map((val) => {
