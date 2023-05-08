@@ -4,7 +4,7 @@ const os            = require('os')
 const path          = require('path')
 
 const ConfigManager = require('./configmanager')
-const DistroManager = require('./distromanager')
+const { DistroAPI } = require('./distromanager')
 const LangLoader    = require('./langloader')
 const { LoggerUtil } = require('helios-core')
 // eslint-disable-next-line no-unused-vars
