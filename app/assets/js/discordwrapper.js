@@ -1,3 +1,4 @@
+// Work in progress
 const { LoggerUtil } = require('helios-core')
 
 const logger = LoggerUtil.getLogger('DiscordWrapper')
@@ -7,13 +8,16 @@ const { Client } = require('discord-rpc-patch')
 let client
 let activity
 
-exports.initRPC = function(genSettings, initialDetails = 'Attente du client..'){
+exports.initRPC = function(genSettings, servSettings, initialDetails = 'Chargement du jeu...'){
     client = new Client({ transport: 'ipc' })
 
     activity = {
         details: initialDetails,
-        largeImageKey: genSettings.smallImageKey,
-        largeImageText: genSettings.smallImageText,
+        state: '> Sur ' + servSettings.shortId,
+        largeImageKey: servSettings.largeImageKey,
+        largeImageText: servSettings.largeImageText,
+        smallImageKey: genSettings.smallImageKey,
+        smallImageText: genSettings.smallImageText,
         startTimestamp: new Date().getTime(),
         instance: false
     }
@@ -32,72 +36,9 @@ exports.initRPC = function(genSettings, initialDetails = 'Attente du client..'){
     })
 }
 
-exports.updateState = function(state){
-    activity.state = state
-    client.setActivity(activity)
-    logger.log('Updated discord state to: ' + state)
-}
-
-exports.clearState = function(){
-    activity = {
-        details: activity.details,
-        largeImageKey: activity.largeImageKey,
-        largeImageText: activity.largeImageText,
-        startTimestamp: activity.startTimestamp,
-        instance: activity.instance
-    }
-    client.setActivity(activity)
-    logger.log('Cleared the activity state!')
-}
-
-exports.startGamePresence = function(genSettings, servSettings){
-    activity = {
-        details: 'Chargement du jeu...',
-        state: '> Sur ' + servSettings.shortId,
-        largeImageKey: servSettings.largeImageKey,
-        largeImageText: servSettings.largeImageText,
-        smallImageKey: genSettings.smallImageKey,
-        smallImageText: genSettings.smallImageText,
-        startTimestamp: new Date().getTime(),
-        instance: activity.instance
-    }
-    client.setActivity(activity)
-    logger.log('Started game presence!')
-}
-
-exports.stopGamePresence = function(genSettings, initialDetails){
-    activity = {
-        details: initialDetails,
-        largeImageKey: genSettings.smallImageKey,
-        largeImageText: genSettings.smallImageText,
-        startTimestamp: new Date().getTime(),
-        instance: activity.instance
-    }
-    client.setActivity(activity)
-    logger.log('Cleared the game activity!')
-}
-
 exports.updateDetails = function(details){
     activity.details = details
     client.setActivity(activity)
-    logger.log('Updated discord details to: ' + details)
-}
-
-exports.clearDetails = function(){
-    activity = {
-        state: activity.state,
-        largeImageKey: activity.largeImageKey,
-        largeImageText: activity.largeImageText,
-        startTimestamp: activity.startTimestamp,
-        instance: activity.instance
-    }
-    logger.log('Cleared the activity details!')
-}
-
-exports.resetTime = function(){
-    activity.startTimestamp = new Date().getTime()
-    client.setActivity(activity)
-    logger.log('Reset the activity time!')
 }
 
 exports.shutdownRPC = function(){

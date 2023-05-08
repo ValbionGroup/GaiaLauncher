@@ -4,7 +4,7 @@
  */
 // Requirements
 const path          = require('path')
-const { Type } = require('helios-distribution-types')
+const { Type }      = require('helios-distribution-types')
 
 const AuthManager   = require('./assets/js/authmanager')
 const ConfigManager = require('./assets/js/configmanager')
@@ -39,7 +39,7 @@ let currentView
  * @param {*} onNextFade Optional. Callback function to execute when the next view
  * fades in.
  */
-function switchView(current, next, currentFadeTime = 250, nextFadeTime = 250, onCurrentFade = () => {}, onNextFade = () => {}){
+function switchView(current, next, currentFadeTime = 500, nextFadeTime = 500, onCurrentFade = () => {}, onNextFade = () => {}){
     currentView = next
     $(`${current}`).fadeOut(currentFadeTime, async () => {
         await onCurrentFade()
@@ -68,7 +68,6 @@ async function showMainUI(data){
     await prepareSettings(true)
     updateSelectedServer(data.getServerById(ConfigManager.getSelectedServer()))
     refreshServerStatus()
-    loadDiscord()
     setTimeout(() => {
         document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
         document.body.style.backgroundImage = `url('assets/images/backgrounds/${document.body.getAttribute('bkid')}.jpg')`
@@ -95,15 +94,11 @@ async function showMainUI(data){
                 loginOptionsViewOnLoginCancel = VIEWS.loginOptions
                 currentView = VIEWS.loginOptions
                 $(VIEWS.loginOptions).fadeIn(1000)
-                if(hasRPC){
-                    DiscordWrapper.updateDetails('Ajoute un compte...')
-                    DiscordWrapper.clearState()
-                }
             }
         }
 
         setTimeout(() => {
-            $('#loadingContainer').fadeOut(150, () => {
+            $('#loadingContainer').fadeOut(500, () => {
                 $('#loadSpinnerImage').removeClass('rotating')
             })
         }, 250)
@@ -117,7 +112,7 @@ async function showMainUI(data){
 
 function showFatalStartupError(){
     setTimeout(() => {
-        $('#loadingContainer').fadeOut(150, () => {
+        $('#loadingContainer').fadeOut(250, () => {
             document.getElementById('overlayContainer').style.background = 'none'
             setOverlayContent(
                 'Erreur fatale : Impossible de charger l\'index de distribution',
@@ -170,7 +165,6 @@ function syncModConfigurations(data){
                 const type = mdl.rawModule.type
 
                 if(type === Type.ForgeMod || type === Type.LiteMod || type === Type.LiteLoader){
-
                     if(!mdl.getRequired().value){
                         const mdlID = mdl.getVersionlessMavenIdentifier()
                         if(modsOld[mdlID] == null){
@@ -385,17 +379,13 @@ async function validateSelectedAccount(){
                 }
                 toggleOverlay(false)
                 switchView(getCurrentView(), VIEWS.loginOptions)
-                if(hasRPC){
-                    DiscordWrapper.updateDetails('Ajoute un compte...')
-                    DiscordWrapper.clearState()
-                }
             })
             setDismissHandler(() => {
                 if(accLen > 1){
                     prepareAccountSelectionList()
-                    $('#overlayContent').fadeOut(150, () => {
+                    $('#overlayContent').fadeOut(250, () => {
                         bindOverlayKeys(true, 'accountSelectContent', true)
-                        $('#accountSelectContent').fadeIn(150)
+                        $('#accountSelectContent').fadeIn(250)
                     })
                 } else {
                     const accountsObj = ConfigManager.getAuthAccounts()

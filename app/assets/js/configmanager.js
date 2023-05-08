@@ -1,7 +1,7 @@
 const fs   = require('fs-extra')
+const { LoggerUtil } = require('helios-core')
 const os   = require('os')
 const path = require('path')
-const { LoggerUtil } = require('helios-core')
 
 const logger = LoggerUtil.getLogger('ConfigManager')
 
@@ -44,7 +44,7 @@ exports.setDataDirectory = function(dataDirectory){
  *
  * @returns {string[]} The server codes list that has been put into the launcher's configuration
  */
- exports.getServerCodes = function(){
+exports.getServerCodes = function(){
     return config.settings.launcher.serverCodes
 }
 
@@ -71,13 +71,13 @@ exports.getAbsoluteMinRAM = function(ram){
     }
 }
 
-exports.getAbsoluteMaxRAM = function(ram){    
+exports.getAbsoluteMaxRAM = function(ram){
     const mem = os.totalmem()
     const gT16 = mem-(16*1073741824)
     return Math.floor((mem-(gT16 > 0 ? (Number.parseInt(gT16/8) + (16*1073741824)/4) : mem/4))/1073741824)
 }
 
-function resolveSelectedRAM(ram){
+function resolveSelectedRAM(ram) {
     if(ram?.recommended != null) {
         return `${ram.recommended}M`
     } else {
@@ -100,12 +100,10 @@ const DEFAULT_CONFIG = {
             resHeight: 720,
             fullscreen: false,
             autoConnect: true,
-            launchDetached: true,
-            consoleOnLaunch: false
+            launchDetached: true
         },
         launcher: {
             allowPrerelease: false,
-            discordIntegration: true,
             dataDirectory: dataPath,
             serverCodes: []
         }
@@ -449,7 +447,7 @@ exports.removeAuthAccount = function(uuid){
 }
 
 /**
- * Get the currently selected DistroManager.setDevMode(true)authenticated account.
+ * Get the currently selected authenticated account.
  * 
  * @returns {Object} The selected authenticated account.
  */
@@ -528,7 +526,7 @@ exports.setModConfiguration = function(serverid, configuration){
 
 // Java Settings
 
-function defaultJavaConfig(effectiveJavaOptions, ram){
+function defaultJavaConfig(effectiveJavaOptions, ram) {
     if(effectiveJavaOptions.suggestedMajor > 8) {
         return defaultJavaConfig17(ram)
     } else {
@@ -792,25 +790,6 @@ exports.setLaunchDetached = function(launchDetached){
     config.settings.game.launchDetached = launchDetached
 }
 
-/**
- * Check if the game should open the devtools console on launch
- *
- * @param {boolean} def Optional. If true, the default value will be returned.
- * @returns {boolean} Whether or not to open the devtools console on launch
- */
- exports.getConsoleOnLaunch = function(def = false){
-    return !def ? config.settings.game.consoleOnLaunch : DEFAULT_CONFIG.settings.game.consoleOnLaunch
-}
-
-/**
- * Change the status of whether or not the devtools console should open on launch
- *
- * @param {boolean} consoleOnLaunch whether or not to open the devtools console on launch
- */
-exports.setConsoleOnLaunch = function(consoleOnLaunch){
-    config.settings.game.consoleOnLaunch = consoleOnLaunch
-}
-
 // Launcher Settings
 
 /**
@@ -824,29 +803,10 @@ exports.getAllowPrerelease = function(def = false){
 }
 
 /**
- * Change the status of whether or not the launcher should download prerelease versions.
+ * Change the status of Whether or not the launcher should download prerelease versions.
  * 
  * @param {boolean} launchDetached Whether or not the launcher should download prerelease versions.
  */
 exports.setAllowPrerelease = function(allowPrerelease){
     config.settings.launcher.allowPrerelease = allowPrerelease
-}
-
-/**
- * Check if the launcher should enable discord presence features
- *
- * @param {boolean} def Optional. If true, the default value will be returned.
- * @returns {boolean} Whether or not the launcher should enable discord presence features
- */
- exports.getDiscordIntegration = function(def = false){
-    return !def ? config.settings.launcher.discordIntegration : DEFAULT_CONFIG.settings.launcher.discordIntegration
-}
-
-/**
- * Change the status of whether or not the launcher should enable discord presence features
- *
- * @param {boolean} discordIntegration Whether or not the launcher should enable discord presence features
- */
-exports.setDiscordIntegration = function(discordIntegration){
-    config.settings.launcher.discordIntegration = discordIntegration
 }

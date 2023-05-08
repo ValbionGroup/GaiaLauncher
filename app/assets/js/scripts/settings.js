@@ -4,7 +4,6 @@ const semver = require('semver')
 
 const DropinModUtil  = require('./assets/js/dropinmodutil')
 const { MSFT_OPCODE, MSFT_REPLY_TYPE, MSFT_ERROR } = require('./assets/js/ipcconstants')
-const loggerSettings = new LoggerUtil('Settings')
 
 const settingsState = {
     invalid: new Set()
@@ -125,7 +124,7 @@ function initSettingsValidators(){
  */
 async function initSettingsValues(){
     const sEls = document.getElementById('settingsContainer').querySelectorAll('[cValue]')
-    
+
     for(const v of sEls) {
         const cVal = v.getAttribute('cValue')
         const serverDependent = v.hasAttribute('serverDependent') // Means the first argument is the server id.
@@ -170,6 +169,7 @@ async function initSettingsValues(){
             }
         }
     }
+
 }
 
 /**
@@ -236,7 +236,7 @@ let selectedSettingsTab = 'settingsTabAccount'
 
 /**
  * Modify the settings container UI when the scroll threshold reaches
- * a certain point.
+ * a certain poin.
  * 
  * @param {UIEvent} e The scroll event.
  */
@@ -286,9 +286,9 @@ function settingsNavItemListener(ele, fade = true){
     document.getElementById(selectedSettingsTab).onscroll = settingsTabScrollListener
 
     if(fade){
-        $(`#${prevTab}`).fadeOut(150, () => {
+        $(`#${prevTab}`).fadeOut(250, () => {
             $(`#${selectedSettingsTab}`).fadeIn({
-                duration: 150,
+                duration: 250,
                 start: () => {
                     settingsTabScrollListener({
                         target: document.getElementById(selectedSettingsTab)
@@ -329,7 +329,7 @@ function fullSettingsSave() {
     saveShaderpackSettings()
 }
 
-    /* Closes the settings view and saves all data. */
+/* Closes the settings view and saves all data. */
 settingsNavDone.onclick = () => {
     fullSettingsSave()
     switchView(getCurrentView(), VIEWS.landing)
@@ -344,7 +344,7 @@ const msftLogoutLogger = LoggerUtil.getLogger('Microsoft Logout')
 
 // Bind the add mojang account button.
 document.getElementById('settingsAddMojangAccount').onclick = (e) => {
-    switchView(getCurrentView(), VIEWS.login, 250, 20, () => {
+    switchView(getCurrentView(), VIEWS.login, 500, 500, () => {
         loginViewOnCancel = VIEWS.settings
         loginViewOnSuccess = VIEWS.settings
         loginCancelEnabled(true)
@@ -391,6 +391,7 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
         if (Object.prototype.hasOwnProperty.call(queryMap, 'error')) {
             switchView(getCurrentView(), viewOnClose, 500, 500, () => {
                 // TODO Dont know what these errors are. Just show them I guess.
+                // This is probably if you messed up the app registration with Azure.      
                 let error = queryMap.error // Error might be 'access_denied' ?
                 let errorDesc = queryMap.error_description
                 console.log('Error getting authCode, is Azure application registered correctly?')
@@ -429,8 +430,8 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
                         // Uh oh.
                         msftLoginLogger.error('Unhandled error during login.', displayableError)
                         actualDisplayableError = {
-                            title: 'Erreur inconnue pendant la connexion',
-                            desc: 'Une erreur inconnue s\'est produite. Veuillez consulter la console pour plus de détails.'
+                            title: 'Unknown Error During Login',
+                            desc: 'An unknown error has occurred. Please see the console for details.'
                         }
                     }
 
@@ -458,10 +459,7 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
             if(!ConfigManager.getServerCodes().includes(code) && code){
                 ConfigManager.getServerCodes().push(code)
                 ConfigManager.save()
-                loggerSettings.info('Added server code to configuration and saved it')
                 prepareLauncherTab()
-            } else {
-                loggerSettings.info('Server code already exists or is empty, not adding.')
             }
         }
     }
@@ -475,11 +473,9 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
                 if(ConfigManager.getServerCodes().includes(code)){
                     ConfigManager.getServerCodes().splice(ConfigManager.getServerCodes().indexOf(code), 1)
                     ConfigManager.save()
-                    loggerSettings.info('Added removed code from configuration and saved it')
                     prepareLauncherTab()
                 }
             }
-            loggerSettings.warn('Server code doesnt exist!, not removing.')
         }
     })
 }
@@ -573,7 +569,7 @@ function processLogOut(val, isLastAccount){
                 switchView(getCurrentView(), VIEWS.loginOptions)
             }
         })
-        $(parent).fadeOut(150, () => {
+        $(parent).fadeOut(250, () => {
             parent.remove()
         })
     }
@@ -680,7 +676,7 @@ function populateAuthAccounts(){
 
         const accHtml = `<div class="settingsAuthAccount" uuid="${acc.uuid}">
             <div class="settingsAuthAccountLeft">
-                <img class="settingsAuthAccountImage" alt="${acc.displayName}" src="https://mc-heads.net/body/${acc.uuid}/60/avatar.png">
+                <img class="settingsAuthAccountImage" alt="${acc.displayName}" src="https://mc-heads.net/body/${acc.uuid}/60">
             </div>
             <div class="settingsAuthAccountRight">
                 <div class="settingsAuthAccountDetails">
@@ -822,7 +818,7 @@ function parseModulesForUI(mdls, submodules, servConf){
                             </div>
                         </div>
                         <label class="toggleSwitch">
-                            <input type="checkbox" formod="${mdl.getVersionlessID()}" ${val ? 'checked' : ''}>
+                            <input type="checkbox" formod="${mdl.getVersionlessMavenIdentifier()}" ${val ? 'checked' : ''}>
                             <span class="toggleSwitchSlider"></span>
                         </label>
                     </div>
@@ -936,7 +932,7 @@ async function resolveDropinModsForUI(){
 function resolveServerCodesForUI(){
     /* Server Codes */
     let servCodes = ''
-    for(let servCode of ConfigManager.getServerCodes()){
+    /* for(let servCode of ConfigManager.getServerCodes()){
         const servs = DistroManager.getDistribution().getServersFromCode(servCode)
         const valid = servs && servs.length
         servCodes +=
@@ -957,7 +953,7 @@ function resolveServerCodesForUI(){
                     </div>
                 </div>
             `
-    }
+    } */
 
     document.getElementById('settingsServerCodesListContent').innerHTML = servCodes
 
@@ -1270,9 +1266,9 @@ settingsMinRAMRange.onchange = (e) => {
     const max = os.totalmem()/1073741824
 
     // Change range bar color based on the selected value.
-    if(sMinV >= max/1.25){
+    if(sMinV >= max/2){
         bar.style.background = '#e86060'
-    } else if(sMinV >= max/2) {
+    } else if(sMinV >= max/4) {
         bar.style.background = '#e8e18b'
     } else {
         bar.style.background = null
@@ -1302,9 +1298,9 @@ settingsMaxRAMRange.onchange = (e) => {
     const max = os.totalmem()/1073741824
 
     // Change range bar color based on the selected value.
-    if(sMaxV >= max/1.65){
+    if(sMaxV >= max/2){
         bar.style.background = '#e86060'
-    } else if(sMaxV >= max/2) {
+    } else if(sMaxV >= max/4) {
         bar.style.background = '#e8e18b'
     } else {
         bar.style.background = null

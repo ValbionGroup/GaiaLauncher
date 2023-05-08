@@ -2,11 +2,11 @@ const AdmZip                = require('adm-zip')
 const child_process         = require('child_process')
 const crypto                = require('crypto')
 const fs                    = require('fs-extra')
-const os                    = require('os')
-const path                  = require('path')
 const { LoggerUtil }        = require('helios-core')
 const { getMojangOS, isLibraryCompatible, mcVersionAtLeast }  = require('helios-core/common')
 const { Type }              = require('helios-distribution-types')
+const os                    = require('os')
+const path                  = require('path')
 
 const ConfigManager            = require('./configmanager')
 
@@ -43,7 +43,7 @@ class ProcessBuilder {
         const modObj = this.resolveModConfiguration(ConfigManager.getModConfiguration(this.server.rawServer.id).mods, this.server.modules)
         
         // Mod list below 1.13
-        if(!Util.mcVersionAtLeast('1.13', this.server.rawServer.minecraftVersion)){
+        if(!mcVersionAtLeast('1.13', this.server.rawServer.minecraftVersion)){
             this.constructJSONModList('forge', modObj.fMods, true)
             if(this.usingLiteLoader){
                 this.constructJSONModList('liteloader', modObj.lMods, true)
@@ -53,7 +53,7 @@ class ProcessBuilder {
         const uberModArr = modObj.fMods.concat(modObj.lMods)
         let args = this.constructJVMArguments(uberModArr, tempNativePath)
 
-        if(Util.mcVersionAtLeast('1.13', this.server.rawServer.minecraftVersion)){
+        if(mcVersionAtLeast('1.13', this.server.rawServer.minecraftVersion)){
             //args = args.concat(this.constructModArguments(modObj.fMods))
             args = args.concat(this.constructModList(modObj.fMods))
         }
@@ -74,6 +74,7 @@ class ProcessBuilder {
 
         child.stdout.on('data', (data) => {
             data.trim().split('\n').forEach(x => console.log(`\x1b[32m[Minecraft]\x1b[0m ${x}`))
+            
         })
         child.stderr.on('data', (data) => {
             data.trim().split('\n').forEach(x => console.log(`\x1b[31m[Minecraft]\x1b[0m ${x}`))
@@ -173,11 +174,11 @@ class ProcessBuilder {
                         const v = this.resolveModConfiguration(modCfg[mdl.getVersionlessMavenIdentifier()].mods, mdl.subModules)
                         fMods = fMods.concat(v.fMods)
                         lMods = lMods.concat(v.lMods)
-                        if(mdl.type === Type.LiteLoader){
+                        if(type === Type.LiteLoader){
                             continue
                         }
                     }
-                    if(mdl.type === Type.ForgeMod){
+                    if(type === Type.ForgeMod){
                         fMods.push(mdl)
                     } else {
                         lMods.push(mdl)
@@ -669,6 +670,7 @@ class ProcessBuilder {
             const version = this.versionData.id
             cpArgs.push(path.join(this.commonDir, 'versions', version, version + '.jar'))
         }
+        
 
         if(this.usingLiteLoader){
             cpArgs.push(this.llPath)
@@ -743,7 +745,7 @@ class ProcessBuilder {
                                 }
                             })
                         }
-    
+
                     }
                 }
                 // 1.19+ logic
@@ -827,7 +829,7 @@ class ProcessBuilder {
         for(let mdl of mdls){
             const type = mdl.rawModule.type
             if(type === Type.ForgeHosted || type === Type.Library){
-                libs[mdl.getVersionlessMavenIdentifier()] = mdl.getArtifact().getPath()
+                libs[mdl.getVersionlessMavenIdentifier()] = mdl.getPath()
                 if(mdl.subModules.length > 0){
                     const res = this._resolveModuleLibraries(mdl)
                     if(res.length > 0){

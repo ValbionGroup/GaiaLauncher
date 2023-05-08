@@ -121,7 +121,7 @@ function showUpdateUI(info){
             toggleOverlay(false)
         })
         toggleOverlay(true, true)*/
-        switchView(getCurrentView(), VIEWS.settings, 250, 250, () => {
+        switchView(getCurrentView(), VIEWS.settings, 500, 500, () => {
             settingsNavItemListener(document.getElementById('settingsNavUpdate'), false)
         })
     }

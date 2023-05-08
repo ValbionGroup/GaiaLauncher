@@ -86,7 +86,7 @@ function toggleOverlay(toggleState, dismissable = false, content = 'overlayConte
             $('#overlayDismiss').hide()
         }
         $('#overlayContainer').fadeIn({
-            duration: 150,
+            duration: 250,
             start: () => {
                 if(getCurrentView() === VIEWS.settings){
                     document.getElementById('settingsContainer').style.backgroundColor = 'transparent'
@@ -98,7 +98,7 @@ function toggleOverlay(toggleState, dismissable = false, content = 'overlayConte
         // Make things tabbable.
         $('#main *').removeAttr('tabindex')
         $('#overlayContainer').fadeOut({
-            duration: 150,
+            duration: 250,
             start: () => {
                 if(getCurrentView() === VIEWS.settings){
                     document.getElementById('settingsContainer').style.backgroundColor = 'rgba(0, 0, 0, 0.50)'
@@ -120,8 +120,6 @@ function toggleOverlay(toggleState, dismissable = false, content = 'overlayConte
 async function toggleServerSelection(toggleState){
     await prepareServerSelectionList()
     toggleOverlay(toggleState, true, 'serverSelectContent')
-    DiscordWrapper.updateDetails('Sélectionne un serveur...')
-    DiscordWrapper.clearState()
 }
 
 /**
@@ -177,12 +175,10 @@ document.getElementById('serverSelectConfirm').addEventListener('click', async (
     const listings = document.getElementsByClassName('serverListing')
     for(let i=0; i<listings.length; i++){
         if(listings[i].hasAttribute('selected')){
-            const serv = (await DistroApi.getDistribution()).getServerById(listings[i].getAttribute('servid'))
+            const serv = (await DistroAPI.getDistribution()).getServerById(listings[i].getAttribute('servid'))
             updateSelectedServer(serv)
             refreshServerStatus(true)
             toggleOverlay(false)
-            DiscordWrapper.updateDetails('Prêt à jouer !')
-            DiscordWrapper.updateState('> Sur ' + serv.getName())
             return
         }
     }
@@ -228,8 +224,8 @@ document.getElementById('serverSelectCancel').addEventListener('click', () => {
 })
 
 document.getElementById('accountSelectCancel').addEventListener('click', () => {
-    $('#accountSelectContent').fadeOut(150, () => {
-        $('#overlayContent').fadeIn(150)
+    $('#accountSelectContent').fadeOut(250, () => {
+        $('#overlayContent').fadeIn(250)
     })
 })
 
@@ -277,9 +273,6 @@ async function populateServerListings(){
     const servers = distro.servers
     let htmlString = ''
     for(const serv of servers){
-        if(serv.getServerCode() && !ConfigManager.getServerCodes().includes(serv.getServerCode())){
-            continue
-        }
         htmlString += `<button class="serverListing" servid="${serv.rawServer.id}" ${serv.rawServer.id === giaSel ? 'selected' : ''}>
             <img class="serverListingImg" src="${serv.rawServer.icon}"/>
             <div class="serverListingDetails">
@@ -312,7 +305,7 @@ function populateAccountListings(){
     let htmlString = ''
     for(let i=0; i<accounts.length; i++){
         htmlString += `<button class="accountListing" uuid="${accounts[i].uuid}" ${i===0 ? 'selected' : ''}>
-            <img src="https://mc-heads.net/head/${accounts[i].uuid}/40/avatar.png">
+            <img src="https://mc-heads.net/head/${accounts[i].uuid}/40">
             <div class="accountListingName">${accounts[i].displayName}</div>
         </button>`
     }
