@@ -1,10 +1,11 @@
 // Requirements
 const os     = require('os')
 const semver = require('semver')
+const { LoggerUtil } = require('helios-core')
 
 const DropinModUtil  = require('./assets/js/dropinmodutil')
 const { MSFT_OPCODE, MSFT_REPLY_TYPE, MSFT_ERROR } = require('./assets/js/ipcconstants')
-const loggerSettings = require('./assets/js/loggerutil')('%c[Settings]', 'color: #353232; font-weight: bold')
+const loggerSettings = LoggerUtil('Settings')
 
 const settingsState = {
     invalid: new Set()
