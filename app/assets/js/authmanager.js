@@ -10,10 +10,10 @@
  */
 // Requirements
 const ConfigManager          = require('./configmanager')
-const { LoggerUtil }         = require('helios-core')
-const { RestResponseStatus } = require('helios-core/common')
-const { MojangRestAPI, mojangErrorDisplayable, MojangErrorCode } = require('helios-core/mojang')
-const { MicrosoftAuth, microsoftErrorDisplayable, MicrosoftErrorCode } = require('helios-core/microsoft')
+const { LoggerUtil }         = require('gaialauncher-core')
+const { RestResponseStatus } = require('gaialauncher-core/common')
+const { MojangRestAPI, mojangErrorDisplayable, MojangErrorCode } = require('gaialauncher-core/mojang')
+const { MicrosoftAuth, microsoftErrorDisplayable, MicrosoftErrorCode } = require('gaialauncher-core/microsoft')
 const { AZURE_CLIENT_ID }    = require('./ipcconstants')
 
 const log = LoggerUtil.getLogger('AuthManager')

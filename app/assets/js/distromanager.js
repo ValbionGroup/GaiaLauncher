@@ -1,4 +1,4 @@
-const { DistributionAPI } = require('helios-core/common')
+const { DistributionAPI } = require('gaialauncher-core/common')
 
 const ConfigManager = require('./configmanager')
 

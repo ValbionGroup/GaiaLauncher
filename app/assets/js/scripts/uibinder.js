@@ -4,7 +4,7 @@
  */
 // Requirements
 const path          = require('path')
-const { Type }      = require('helios-distribution-types')
+const { Type }      = require('gaialauncher-distribution-types')
 
 const AuthManager   = require('./assets/js/authmanager')
 const ConfigManager = require('./assets/js/configmanager')
