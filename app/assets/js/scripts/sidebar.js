@@ -2,8 +2,6 @@
  * Script for sidebar.ejs
  */
 
-const { LoggerUtil } = require("gaialauncher-core");
-
 // Launch Elements
 const buttons = document.querySelectorAll('.panels .button');
 const userImg = document.getElementsByClassName('account-side-img');
