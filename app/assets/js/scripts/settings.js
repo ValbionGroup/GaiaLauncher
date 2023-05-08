@@ -40,44 +40,6 @@ document.addEventListener('click', closeSettingsSelect)
 
 bindSettingsSelect()
 
-
-function bindFileSelectors(){
-    for(let ele of document.getElementsByClassName('settingsFileSelButton')){
-        
-        ele.onclick = async e => {
-            const isJavaExecSel = ele.id === 'settingsJavaExecSel'
-            const directoryDialog = ele.hasAttribute('dialogDirectory') && ele.getAttribute('dialogDirectory') == 'true'
-            const properties = directoryDialog ? ['openDirectory', 'createDirectory'] : ['openFile']
-
-            const options = {
-                properties
-            }
-
-            if(ele.hasAttribute('dialogTitle')) {
-                options.title = ele.getAttribute('dialogTitle')
-            }
-
-            if(isJavaExecSel && process.platform === 'win32') {
-                options.filters = [
-                    { name: 'Executables', extensions: ['exe'] },
-                    { name: 'All Files', extensions: ['*'] }
-                ]
-            }
-
-            const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), options)
-            if(!res.canceled) {
-                ele.previousElementSibling.value = res.filePaths[0]
-                if(isJavaExecSel) {
-                    await populateJavaExecDetails(ele.previousElementSibling.value)
-                }
-            }
-        }
-    }
-}
-
-bindFileSelectors()
-
-
 /**
  * General Settings Functions
  */
@@ -89,6 +51,8 @@ bindFileSelectors()
   * will be disabled until the value is corrected. This is an automated
   * process. More complex UI may need to be bound separately.
   */
+// FIXME - Enable when dev is complete.
+/*
 function initSettingsValidators(){
     const sEls = document.getElementById('settingsContainer').querySelectorAll('[cValue]')
     Array.from(sEls).map((v, index, arr) => {
@@ -118,6 +82,7 @@ function initSettingsValidators(){
 
     })
 }
+*/
 
 /**
  * Load configuration values onto the UI. This is an automated process.
@@ -485,269 +450,12 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
 }
 
 /**
- * Bind functionality for the account selection buttons. If another account
- * is selected, the UI of the previously selected account will be updated.
- */
-function bindAuthAccountSelect(){
-    Array.from(document.getElementsByClassName('settingsAuthAccountSelect')).map((val) => {
-        val.onclick = (e) => {
-            if(val.hasAttribute('selected')){
-                return
-            }
-            const selectBtns = document.getElementsByClassName('settingsAuthAccountSelect')
-            for(let i=0; i<selectBtns.length; i++){
-                if(selectBtns[i].hasAttribute('selected')){
-                    selectBtns[i].removeAttribute('selected')
-                    selectBtns[i].innerHTML = 'Choisir un compte'
-                }
-            }
-            val.setAttribute('selected', '')
-            val.innerHTML = 'Compte sélectionné &#10004;'
-            setSelectedAccount(val.closest('.settingsAuthAccount').getAttribute('uuid'))
-        }
-    })
-}
-
-/**
- * Bind functionality for the log out button. If the logged out account was
- * the selected account, another account will be selected and the UI will
- * be updated accordingly.
- */
-function bindAuthAccountLogOut(){
-    Array.from(document.getElementsByClassName('settingsAuthAccountLogOut')).map((val) => {
-        val.onclick = (e) => {
-            let isLastAccount = false
-            if(Object.keys(ConfigManager.getAuthAccounts()).length === 1){
-                isLastAccount = true
-                setOverlayContent(
-                    'Attention<br>Ceci est votre dernier compte',
-                    'In order to use the launcher you must be logged into at least one account. Vous devrez vous reconnecter après.<br/><br/>Êtes-vous sûr de vouloir vous déconnecter ?',
-                    'J\'en suis sûr',
-                    'Annuler'
-                )
-                setOverlayHandler(() => {
-                    processLogOut(val, isLastAccount)
-                    toggleOverlay(false)
-                })
-                setDismissHandler(() => {
-                    toggleOverlay(false)
-                })
-                toggleOverlay(true, true)
-            } else {
-                processLogOut(val, isLastAccount)
-            }
-            
-        }
-    })
-}
-
-let msAccDomElementCache
-/**
- * Process a log out.
- * 
- * @param {Element} val The log out button element.
- * @param {boolean} isLastAccount If this logout is on the last added account.
- */
-function processLogOut(val, isLastAccount){
-    const parent = val.closest('.settingsAuthAccount')
-    const uuid = parent.getAttribute('uuid')
-    const prevSelAcc = ConfigManager.getSelectedAccount()
-    const targetAcc = ConfigManager.getAuthAccount(uuid)
-    if(targetAcc.type === 'microsoft') {
-        msAccDomElementCache = parent
-        switchView(getCurrentView(), VIEWS.waiting, 500, 500, () => {
-            ipcRenderer.send(MSFT_OPCODE.OPEN_LOGOUT, uuid, isLastAccount)
-        })
-    } else {
-        AuthManager.removeMojangAccount(uuid).then(() => {
-            if(!isLastAccount && uuid === prevSelAcc.uuid){
-                const selAcc = ConfigManager.getSelectedAccount()
-                refreshAuthAccountSelected(selAcc.uuid)
-                updateSelectedAccount(selAcc)
-                validateSelectedAccount()
-            }
-            if(isLastAccount) {
-                loginOptionsCancelEnabled(false)
-                loginOptionsViewOnLoginSuccess = VIEWS.settings
-                loginOptionsViewOnLoginCancel = VIEWS.loginOptions
-                switchView(getCurrentView(), VIEWS.loginOptions)
-            }
-        })
-        $(parent).fadeOut(250, () => {
-            parent.remove()
-        })
-    }
-}
-
-// Bind reply for Microsoft Logout.
-ipcRenderer.on(MSFT_OPCODE.REPLY_LOGOUT, (_, ...arguments_) => {
-    if (arguments_[0] === MSFT_REPLY_TYPE.ERROR) {
-        switchView(getCurrentView(), VIEWS.settings, 500, 500, () => {
-
-            if(arguments_.length > 1 && arguments_[1] === MSFT_ERROR.NOT_FINISHED) {
-                // User cancelled.
-                msftLogoutLogger.info('Logout cancelled by user.')
-                return
-            }
-
-            // Unexpected error.
-            setOverlayContent(
-                'Quelque chose n\'a pas marché',
-                'La déconnexion de Microsoft a échoué. Veuillez réessayer.',
-                'OK'
-            )
-            setOverlayHandler(() => {
-                toggleOverlay(false)
-            })
-            toggleOverlay(true)
-        })
-    } else if(arguments_[0] === MSFT_REPLY_TYPE.SUCCESS) {
-        
-        const uuid = arguments_[1]
-        const isLastAccount = arguments_[2]
-        const prevSelAcc = ConfigManager.getSelectedAccount()
-
-        msftLogoutLogger.info('Logout Successful. uuid:', uuid)
-        
-        AuthManager.removeMicrosoftAccount(uuid)
-            .then(() => {
-                if(!isLastAccount && uuid === prevSelAcc.uuid){
-                    const selAcc = ConfigManager.getSelectedAccount()
-                    refreshAuthAccountSelected(selAcc.uuid)
-                    updateSelectedAccount(selAcc)
-                    validateSelectedAccount()
-                }
-                if(isLastAccount) {
-                    loginOptionsCancelEnabled(false)
-                    loginOptionsViewOnLoginSuccess = VIEWS.settings
-                    loginOptionsViewOnLoginCancel = VIEWS.loginOptions
-                    switchView(getCurrentView(), VIEWS.loginOptions)
-                }
-                if(msAccDomElementCache) {
-                    msAccDomElementCache.remove()
-                    msAccDomElementCache = null
-                }
-            })
-            .finally(() => {
-                if(!isLastAccount) {
-                    switchView(getCurrentView(), VIEWS.settings, 500, 500)
-                }
-            })
-
-    }
-})
-
-/**
- * Refreshes the status of the selected account on the auth account
- * elements.
- * 
- * @param {string} uuid The UUID of the new selected account.
- */
-function refreshAuthAccountSelected(uuid){
-    Array.from(document.getElementsByClassName('settingsAuthAccount')).map((val) => {
-        const selBtn = val.getElementsByClassName('settingsAuthAccountSelect')[0]
-        if(uuid === val.getAttribute('uuid')){
-            selBtn.setAttribute('selected', '')
-            selBtn.innerHTML = 'Compte sélectionné &#10004;'
-        } else {
-            if(selBtn.hasAttribute('selected')){
-                selBtn.removeAttribute('selected')
-            }
-            selBtn.innerHTML = 'Choisir le compte'
-        }
-    })
-}
-
-const settingsCurrentMicrosoftAccounts = document.getElementById('settingsCurrentMicrosoftAccounts')
-const settingsCurrentMojangAccounts = document.getElementById('settingsCurrentMojangAccounts')
-
-/**
- * Add auth account elements for each one stored in the authentication database.
- */
-function populateAuthAccounts(){
-    const authAccounts = ConfigManager.getAuthAccounts()
-    const authKeys = Object.keys(authAccounts)
-    if(authKeys.length === 0){
-        return
-    }
-    const selectedUUID = ConfigManager.getSelectedAccount().uuid
-
-    let microsoftAuthAccountStr = ''
-    let mojangAuthAccountStr = ''
-
-    authKeys.forEach((val) => {
-        const acc = authAccounts[val]
-
-        const accHtml = `<div class="settingsAuthAccount" uuid="${acc.uuid}">
-            <div class="settingsAuthAccountLeft">
-                <img class="settingsAuthAccountImage" alt="${acc.displayName}" src="https://mc-heads.net/body/${acc.uuid}/60">
-            </div>
-            <div class="settingsAuthAccountRight">
-                <div class="settingsAuthAccountDetails">
-                    <div class="settingsAuthAccountDetailPane">
-                        <div class="settingsAuthAccountDetailTitle">Username</div>
-                        <div class="settingsAuthAccountDetailValue">${acc.displayName}</div>
-                    </div>
-                    <div class="settingsAuthAccountDetailPane">
-                        <div class="settingsAuthAccountDetailTitle">UUID</div>
-                        <div class="settingsAuthAccountDetailValue">${acc.uuid}</div>
-                    </div>
-                </div>
-                <div class="settingsAuthAccountActions">
-                    <button class="settingsAuthAccountSelect" ${selectedUUID === acc.uuid ? 'selected>Selected Account &#10004;' : '>Select Account'}</button>
-                    <div class="settingsAuthAccountWrapper">
-                        <button class="settingsAuthAccountLogOut">Log Out</button>
-                    </div>
-                </div>
-            </div>
-        </div>`
-
-        if(acc.type === 'microsoft') {
-            microsoftAuthAccountStr += accHtml
-        } else {
-            mojangAuthAccountStr += accHtml
-        }
-
-    })
-
-    settingsCurrentMicrosoftAccounts.innerHTML = microsoftAuthAccountStr
-    settingsCurrentMojangAccounts.innerHTML = mojangAuthAccountStr
-}
-
-/**
- * Prepare the accounts tab for display.
- */
-function prepareAccountsTab() {
-    populateAuthAccounts()
-    bindAuthAccountSelect()
-    bindAuthAccountLogOut()
-}
-
-/**
  * Prepare the launcher tab for display.
  */
 async function prepareLauncherTab() {
     await resolveServerCodesForUI()
     bindServerCodeButtons()
 }
-
-/**
- * Minecraft Tab
- */
-
-/**
-  * Disable decimals, negative signs, and scientific notation.
-  */
-document.getElementById('settingsGameWidth').addEventListener('keydown', (e) => {
-    if(/^[-.eE]$/.test(e.key)){
-        e.preventDefault()
-    }
-})
-document.getElementById('settingsGameHeight').addEventListener('keydown', (e) => {
-    if(/^[-.eE]$/.test(e.key)){
-        e.preventDefault()
-    }
-})
 
 /**
  * Mods Tab
@@ -1240,6 +948,8 @@ async function prepareModsTab(first){
     await loadSelectedServerOnModsTab()
 }
 
+//SECTION - JAVA TAB - MIGRATE TO PROPER JS FILE
+
 /**
  * Java Tab
  */
@@ -1491,6 +1201,8 @@ async function prepareJavaTab(){
     populateJavaReqDesc(server)
     populateJvmOptsLink(server)
 }
+
+// SECTION - END SECTION
 
 /**
  * About Tab
