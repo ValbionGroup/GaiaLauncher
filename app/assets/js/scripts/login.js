@@ -21,8 +21,6 @@ const loginForm             = document.getElementById('loginForm')
 // Control variables.
 let lu = false, lp = false
 
-const loggerLogin = LoggerUtil1('%c[Login]', 'color: #000668; font-weight: bold')
-
 
 /**
  * Show a login error.
@@ -195,10 +193,10 @@ loginButton.addEventListener('click', () => {
         $('.circle-loader').toggleClass('load-complete')
         $('.checkmark').toggle()
         setTimeout(() => {
-            switchView(VIEWS.login, loginViewOnSuccess, 500, 500, () => {
+            switchView(VIEWS.login, loginViewOnSuccess, 500, 500, async () => {
                 // Temporary workaround
                 if(loginViewOnSuccess === VIEWS.settings){
-                    prepareSettings()
+                    await prepareSettings()
                 }
                 loginViewOnSuccess = VIEWS.landing // Reset this for good measure.
                 loginCancelEnabled(false) // Reset this for good measure.
