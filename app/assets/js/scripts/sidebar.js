@@ -1,61 +1,80 @@
-const {ipcRenderer} = require('electron')
-const fs            = require('fs-extra')
-const os            = require('os')
-const path          = require('path')
+/**
+ * Script for sidebar.ejs
+ */
 
-const ConfigManager = require('./configmanager')
-const DistroAPI     = require('./distromanager')
-const LangLoader    = require('./langloader')
-const { LoggerUtil } = require('gaialauncher-core')
-// eslint-disable-next-line no-unused-vars
-const { HeliosDistribution } = require('gaialauncher-core/common')
+const { LoggerUtil } = require("gaialauncher-core");
 
-const logger = LoggerUtil('Sidebar')
+// Launch Elements
+const buttons = document.querySelectorAll('.panels .button');
+const userImg = document.getElementsByClassName('account-side-img');
+const account = document.getElementsByClassName('account-side');
+const isUserConnected = document.getElementById('isConnected');
+const sidePlay = document.getElementById('play-button');
 
-// Load ConfigManager
-ConfigManager.load()
+const loggerSidebar = LoggerUtil('[Sidebar]');
 
-// Yuck!
-// TODO Fix this
-DistroAPI['commonDir'] = ConfigManager.getCommonDirectory()
-DistroAPI['instanceDir'] = ConfigManager.getInstanceDirectory()
+let activeBtn = document.querySelector('#serverBtn.button');
+let settings = document.getElementById('settingsBtn');
 
-// Load Strings
-LangLoader.loadLanguage('fr_FR')
+// Bind selected account
+function updateSelectedAccount(authUser) {
+	if (authUser != null) {
+		if (authUser.displayName != null) {
+			account[0].ariaLabel = authUser.displayName;
+		}
+		if (authUser.uuid != null) {
+			userImg[0].setAttribute('src', `https://mc-heads.net/avatar/${authUser.uuid}/250/avatar.png`)
+		}
+		isUserConnected.classList.add('green');
+		isUserConnected.classList.remove('red');
+	} else {
+		isUserConnected.classList.add('red');
+		isUserConnected.classList.remove('green');
+		account[0].ariaLabel = "Non connecté";
+		userImg[0].setAttribute('src', 'https://mc-heads.net/avatar/250/avatar.png')
+	}
+}
+updateSelectedAccount(ConfigManager.getSelectedAccount())
 
-function onDistroLoad(data){
-    if(data != null){
-        
-        // Resolve the selected server if its value has yet to be set.
-        if(ConfigManager.getSelectedServer() == null || data.getServerById(ConfigManager.getSelectedServer()) == null){
-            logger.info('Determining default selected server..')
-            ConfigManager.setSelectedServer(data.getMainServer().rawServer.id)
-            ConfigManager.save()
-        }
-    }
-    ipcRenderer.send('distributionIndexDone', data != null)
+function buttonClicked(button) {
+	if (button.id == activeBtn.id) return;
+	if (button.id == 'settingsBtn') {
+		if (activeBtn.parentElement.id == "stg") {
+			activeBtn.classList.toggle("active");
+			(activeBtn = document.querySelector("#serverBtn.button")).classList.toggle("active");
+			switchView(getCurrentView(), VIEWS.server)
+		}
+		return button.classList.toggle("close");
+	}
+	activeBtn.classList.toggle('active');
+	button.classList.toggle('active');
+	activeBtn = button;
+	loggerSidebar.log(`Switched to ${button.id.substr(0, button.id.length-3)} panel`);
+	switchView(getCurrentView(), VIEWS[button.id.substr(0, button.id.length-3)]);
 }
 
-// Ensure Distribution is downloaded and cached.
-DistroAPI.getDistribution()
-    .then(heliosDistro => {
-        logger.info('Loaded distribution index.')
-        onDistroLoad(heliosDistro)
-    })
-    .catch(err => {
-        logger.info('Failed to load an older version of the distribution index.')
-        logger.info('Application cannot run.')
-        logger.error(err)
+// Buttons listener
+buttons.forEach(button => {
+	button.addEventListener('click', () => {
+		buttonClicked(button);
+	});
+});
 
-        onDistroLoad(null)
-    })
+/** 
+ * FIXME - Account not clickable 
+account.onclick = function () {
+	if(settings.classList.contains('close')){
+		settings.classList.toggle('close');
+		activeBtn.classList.toggle('active');
+		(activeBtn = document.querySelector('#account.button')).classList.toggle('active');
+		switchView(getCurrentView(), VIEWS.account);
+	}
+}; 
+*/
+
+sidePlay.addEventListener("click", () => {
+	LauncherScript.launchGame() 
+});
 
 
-// Clean up temp dir incase previous launches ended unexpectedly. 
-fs.remove(path.join(os.tmpdir(), ConfigManager.getTempNativeFolder()), (err) => {
-    if(err){
-        logger.warn('Error while cleaning natives directory', err)
-    } else {
-        logger.info('Cleaned natives directory.')
-    }
-})
+loggerSidebar.info('Sidebar initialized');
