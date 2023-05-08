@@ -2,7 +2,6 @@
 const os     = require('os')
 const semver = require('semver')
 
-const { JavaGuard } = require('./assets/js/assetguard')
 const DropinModUtil  = require('./assets/js/dropinmodutil')
 const { MSFT_OPCODE, MSFT_REPLY_TYPE, MSFT_ERROR } = require('./assets/js/ipcconstants')
 const loggerSettings = require('./assets/js/loggerutil')('%c[Settings]', 'color: #353232; font-weight: bold')
@@ -70,7 +69,7 @@ function bindFileSelectors(){
             if(!res.canceled) {
                 ele.previousElementSibling.value = res.filePaths[0]
                 if(isJavaExecSel) {
-                    populateJavaExecDetails(ele.previousElementSibling.value)
+                    await populateJavaExecDetails(ele.previousElementSibling.value)
                 }
             }
         }
@@ -124,50 +123,53 @@ function initSettingsValidators(){
 /**
  * Load configuration values onto the UI. This is an automated process.
  */
-function initSettingsValues(){
+async function initSettingsValues(){
     const sEls = document.getElementById('settingsContainer').querySelectorAll('[cValue]')
-    Array.from(sEls).map((v, index, arr) => {
+    
+    for(const v of sEls) {
         const cVal = v.getAttribute('cValue')
+        const serverDependent = v.hasAttribute('serverDependent') // Means the first argument is the server id.
         const gFn = ConfigManager['get' + cVal]
+        const gFnOpts = []
+        if(serverDependent) {
+            gFnOpts.push(ConfigManager.getSelectedServer())
+        }
         if(typeof gFn === 'function'){
             if(v.tagName === 'INPUT'){
                 if(v.type === 'number' || v.type === 'text'){
                     // Special Conditions
                     if(cVal === 'JavaExecutable'){
-                        populateJavaExecDetails(v.value)
-                        v.value = gFn()
+                        v.value = gFn.apply(null, gFnOpts)
+                        await populateJavaExecDetails(v.value)
                     } else if (cVal === 'DataDirectory'){
-                        v.value = gFn()
-                    } else if (cVal === 'ServerCode'){
-                        v.value = gFn()
+                        v.value = gFn.apply(null, gFnOpts)
                     } else if(cVal === 'JVMOptions'){
-                        v.value = gFn().join(' ')
+                        v.value = gFn.apply(null, gFnOpts).join(' ')
                     } else {
-                        v.value = gFn()
+                        v.value = gFn.apply(null, gFnOpts)
                     }
                 } else if(v.type === 'checkbox'){
-                    v.checked = gFn()
+                    v.checked = gFn.apply(null, gFnOpts)
                 }
             } else if(v.tagName === 'DIV'){
                 if(v.classList.contains('rangeSlider')){
                     // Special Conditions
                     if(cVal === 'MinRAM' || cVal === 'MaxRAM'){
-                        let val = gFn()
+                        let val = gFn.apply(null, gFnOpts)
                         if(val.endsWith('M')){
-                            val = Number(val.substring(0, val.length-1))/1000
+                            val = Number(val.substring(0, val.length-1))/1024
                         } else {
                             val = Number.parseFloat(val)
                         }
 
                         v.setAttribute('value', val)
                     } else {
-                        v.setAttribute('value', Number.parseFloat(gFn()))
+                        v.setAttribute('value', Number.parseFloat(gFn.apply(null, gFnOpts)))
                     }
                 }
             }
         }
-
-    })
+    }
 }
 
 /**
@@ -177,22 +179,31 @@ function saveSettingsValues(){
     const sEls = document.getElementById('settingsContainer').querySelectorAll('[cValue]')
     Array.from(sEls).map((v, index, arr) => {
         const cVal = v.getAttribute('cValue')
+        const serverDependent = v.hasAttribute('serverDependent') // Means the first argument is the server id.
         const sFn = ConfigManager['set' + cVal]
+        const sFnOpts = []
+        if(serverDependent) {
+            sFnOpts.push(ConfigManager.getSelectedServer())
+        }
         if(typeof sFn === 'function'){
             if(v.tagName === 'INPUT'){
                 if(v.type === 'number' || v.type === 'text'){
                     // Special Conditions
                     if(cVal === 'JVMOptions'){
                         if(!v.value.trim()) {
-                            sFn([])
+                            sFnOpts.push([])
+                            sFn.apply(null, sFnOpts)
                         } else {
-                            sFn(v.value.trim().split(/\s+/))
+                            sFnOpts.push(v.value.trim().split(/\s+/))
+                            sFn.apply(null, sFnOpts)
                         }
                     } else {
-                        sFn(v.value)
+                        sFnOpts.push(v.value)
+                        sFn.apply(null, sFnOpts)
                     }
                 } else if(v.type === 'checkbox'){
-                    sFn(v.checked)
+                    sFnOpts.push(v.checked)
+                    sFn.apply(null, sFnOpts)
                     // Special Conditions
                     if(cVal === 'AllowPrerelease'){
                         changeAllowPrerelease(v.checked)
@@ -204,14 +215,16 @@ function saveSettingsValues(){
                     if(cVal === 'MinRAM' || cVal === 'MaxRAM'){
                         let val = Number(v.getAttribute('value'))
                         if(val%1 > 0){
-                            val = val*1000 + 'M'
+                            val = val*1024 + 'M'
                         } else {
                             val = val + 'G'
                         }
 
-                        sFn(val)
+                        sFnOpts.push(val)
+                        sFn.apply(null, sFnOpts)
                     } else {
-                        sFn(v.getAttribute('value'))
+                        sFnOpts.push(v.getAttribute('value'))
+                        sFn.apply(null, sFnOpts)
                     }
                 }
             }
@@ -308,23 +321,18 @@ function settingsSaveDisabled(v){
     settingsNavDone.disabled = v
 }
 
-/* Closes the settings view and saves all data. */
-settingsNavDone.onclick = () => {
+function fullSettingsSave() {
     saveSettingsValues()
     saveModConfiguration()
     ConfigManager.save()
     saveDropinModConfiguration()
     saveShaderpackSettings()
+}
+
+    /* Closes the settings view and saves all data. */
+settingsNavDone.onclick = () => {
+    fullSettingsSave()
     switchView(getCurrentView(), VIEWS.landing)
-    if(hasRPC){
-        if(ConfigManager.getSelectedServer()){
-            const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
-            DiscordWrapper.updateDetails('Prêt à jouer !')
-            DiscordWrapper.updateState('> Sur ' + serv.getName())
-        } else {
-            DiscordWrapper.updateDetails('Page d\'accueil')
-        }
-    }
 }
 
 /**
@@ -340,10 +348,6 @@ document.getElementById('settingsAddMojangAccount').onclick = (e) => {
         loginViewOnCancel = VIEWS.settings
         loginViewOnSuccess = VIEWS.settings
         loginCancelEnabled(true)
-        if(hasRPC){
-            DiscordWrapper.updateDetails('Ajoute un compte...')
-            DiscordWrapper.clearState()
-        }
     })
 }
 
@@ -387,13 +391,12 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
         if (Object.prototype.hasOwnProperty.call(queryMap, 'error')) {
             switchView(getCurrentView(), viewOnClose, 500, 500, () => {
                 // TODO Dont know what these errors are. Just show them I guess.
-                // This is probably if you messed up the app registration with Azure.
-                console.log('Error getting authCode, is Azure application registered correctly?')
-                console.log(error)
-                console.log(error_description)
-                console.log('Full query map', queryMap)
                 let error = queryMap.error // Error might be 'access_denied' ?
                 let errorDesc = queryMap.error_description
+                console.log('Error getting authCode, is Azure application registered correctly?')
+                console.log(error)
+                console.log(errorDesc)
+                console.log('Full query map: ', queryMap)
                 setOverlayContent(
                     error,
                     errorDesc,
@@ -412,8 +415,8 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
             const authCode = queryMap.code
             AuthManager.addMicrosoftAccount(authCode).then(value => {
                 updateSelectedAccount(value)
-                switchView(getCurrentView(), viewOnClose, 500, 500, () => {
-                    prepareSettings()
+                switchView(getCurrentView(), viewOnClose, 500, 500, async () => {
+                    await prepareSettings()
                 })
             })
                 .catch((displayableError) => {
@@ -755,13 +758,13 @@ const settingsModsContainer = document.getElementById('settingsModsContainer')
 /**
  * Resolve and update the mods on the UI.
  */
-function resolveModsForUI(){
+async function resolveModsForUI(){
     const serv = ConfigManager.getSelectedServer()
 
-    const distro = DistroManager.getDistribution()
+    const distro = await DistroAPI.getDistribution()
     const servConf = ConfigManager.getModConfiguration(serv)
 
-    const modStr = parseModulesForUI(distro.getServer(serv).getModules(), false, servConf.mods)
+    const modStr = parseModulesForUI(distro.getServerById(serv).modules, false, servConf.mods)
 
     document.getElementById('settingsReqModsContent').innerHTML = modStr.reqMods
     document.getElementById('settingsOptModsContent').innerHTML = modStr.optMods
@@ -781,17 +784,17 @@ function parseModulesForUI(mdls, submodules, servConf){
 
     for(const mdl of mdls){
 
-        if(mdl.getType() === DistroManager.Types.ForgeMod || mdl.getType() === DistroManager.Types.LiteMod || mdl.getType() === DistroManager.Types.LiteLoader){
+        if(mdl.rawModule.type === Type.ForgeMod || mdl.rawModule.type === Type.LiteMod || mdl.rawModule.type === Type.LiteLoader){
 
-            if(mdl.getRequired().isRequired()){
+            if(mdl.getRequired().value){
 
-                reqMods += `<div id="${mdl.getVersionlessID()}" class="settingsBaseMod settings${submodules ? 'Sub' : ''}Mod" enabled>
+                reqMods += `<div id="${mdl.getVersionlessMavenIdentifier()}" class="settingsBaseMod settings${submodules ? 'Sub' : ''}Mod" enabled>
                     <div class="settingsModContent">
                         <div class="settingsModMainWrapper">
                             <div class="settingsModStatus"></div>
                             <div class="settingsModDetails">
-                                <span class="settingsModName">${mdl.getName()}</span>
-                                <span class="settingsModVersion">v${mdl.getVersion()}</span>
+                                <span class="settingsModName">${mdl.rawModule.name}</span>
+                                <span class="settingsModVersion">v${mdl.mavenComponents.version}</span>
                             </div>
                         </div>
                         <label class="toggleSwitch" reqmod>
@@ -799,23 +802,23 @@ function parseModulesForUI(mdls, submodules, servConf){
                             <span class="toggleSwitchSlider"></span>
                         </label>
                     </div>
-                    ${mdl.hasSubModules() ? `<div class="settingsSubModContainer">
-                        ${Object.values(parseModulesForUI(mdl.getSubModules(), true, servConf[mdl.getVersionlessID()])).join('')}
+                    ${mdl.subModules.length > 0 ? `<div class="settingsSubModContainer">
+                        ${Object.values(parseModulesForUI(mdl.subModules, true, servConf[mdl.getVersionlessMavenIdentifier()])).join('')}
                     </div>` : ''}
                 </div>`
 
             } else {
 
-                const conf = servConf[mdl.getVersionlessID()]
+                const conf = servConf[mdl.getVersionlessMavenIdentifier()]
                 const val = typeof conf === 'object' ? conf.value : conf
 
-                optMods += `<div id="${mdl.getVersionlessID()}" class="settingsBaseMod settings${submodules ? 'Sub' : ''}Mod" ${val ? 'enabled' : ''}>
+                optMods += `<div id="${mdl.getVersionlessMavenIdentifier()}" class="settingsBaseMod settings${submodules ? 'Sub' : ''}Mod" ${val ? 'enabled' : ''}>
                     <div class="settingsModContent">
                         <div class="settingsModMainWrapper">
                             <div class="settingsModStatus"></div>
                             <div class="settingsModDetails">
-                                <span class="settingsModName">${mdl.getName()}</span>
-                                <span class="settingsModVersion">v${mdl.getVersion()}</span>
+                                <span class="settingsModName">${mdl.rawModule.name}</span>
+                                <span class="settingsModVersion">v${mdl.mavenComponents.version}</span>
                             </div>
                         </div>
                         <label class="toggleSwitch">
@@ -823,8 +826,8 @@ function parseModulesForUI(mdls, submodules, servConf){
                             <span class="toggleSwitchSlider"></span>
                         </label>
                     </div>
-                    ${mdl.hasSubModules() ? `<div class="settingsSubModContainer">
-                        ${Object.values(parseModulesForUI(mdl.getSubModules(), true, conf.mods)).join('')}
+                    ${mdl.subModules.length > 0 ? `<div class="settingsSubModContainer">
+                        ${Object.values(parseModulesForUI(mdl.subModules, true, conf.mods)).join('')}
                     </div>` : ''}
                 </div>`
 
@@ -900,10 +903,10 @@ let CACHE_DROPIN_MODS
  * Resolve any located drop-in mods for this server and
  * populate the results onto the UI.
  */
-function resolveDropinModsForUI(){
-    const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
-    CACHE_SETTINGS_MODS_DIR = path.join(ConfigManager.getInstanceDirectory(), serv.getID(), 'mods')
-    CACHE_DROPIN_MODS = DropinModUtil.scanForDropinMods(CACHE_SETTINGS_MODS_DIR, serv.getMinecraftVersion())
+async function resolveDropinModsForUI(){
+    const serv = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
+    CACHE_SETTINGS_MODS_DIR = path.join(ConfigManager.getInstanceDirectory(), serv.rawServer.id, 'mods')
+    CACHE_DROPIN_MODS = DropinModUtil.scanForDropinMods(CACHE_SETTINGS_MODS_DIR, serv.rawServer.minecraftVersion)
 
     let dropinMods = ''
 
@@ -1030,12 +1033,12 @@ function bindDropinModFileSystemButton(){
         fsBtn.removeAttribute('drag')
     }
 
-    fsBtn.ondrop = e => {
+    fsBtn.ondrop = async e => {
         fsBtn.removeAttribute('drag')
         e.preventDefault()
 
         DropinModUtil.addDropinMods(e.dataTransfer.files, CACHE_SETTINGS_MODS_DIR)
-        reloadDropinMods()
+        await reloadDropinMods()
     }
 }
 
@@ -1067,18 +1070,18 @@ function saveDropinModConfiguration(){
 
 // Refresh the drop-in mods when F5 is pressed.
 // Only active on the mods tab.
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', async (e) => {
     if(getCurrentView() === VIEWS.settings && selectedSettingsTab === 'settingsTabMods'){
         if(e.key === 'F5'){
-            reloadDropinMods()
+            await reloadDropinMods()
             saveShaderpackSettings()
-            resolveShaderpacksForUI()
+            await resolveShaderpacksForUI()
         }
     }
 })
 
-function reloadDropinMods(){
-    resolveDropinModsForUI()
+async function reloadDropinMods(){
+    await resolveDropinModsForUI()
     bindDropinModsRemoveButton()
     bindDropinModFileSystemButton()
     bindModsToggleSwitch()
@@ -1093,9 +1096,9 @@ let CACHE_SELECTED_SHADERPACK
 /**
  * Load shaderpack information.
  */
-function resolveShaderpacksForUI(){
-    const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
-    CACHE_SETTINGS_INSTANCE_DIR = path.join(ConfigManager.getInstanceDirectory(), serv.getID())
+async function resolveShaderpacksForUI(){
+    const serv = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
+    CACHE_SETTINGS_INSTANCE_DIR = path.join(ConfigManager.getInstanceDirectory(), serv.rawServer.id)
     CACHE_SHADERPACKS = DropinModUtil.scanForShaderpacks(CACHE_SETTINGS_INSTANCE_DIR)
     CACHE_SELECTED_SHADERPACK = DropinModUtil.getEnabledShaderpack(CACHE_SETTINGS_INSTANCE_DIR)
 
@@ -1154,13 +1157,13 @@ function bindShaderpackButton() {
         spBtn.removeAttribute('drag')
     }
 
-    spBtn.ondrop = e => {
+    spBtn.ondrop = async e => {
         spBtn.removeAttribute('drag')
         e.preventDefault()
 
         DropinModUtil.addShaderpacks(e.dataTransfer.files, CACHE_SETTINGS_INSTANCE_DIR)
         saveShaderpackSettings()
-        resolveShaderpacksForUI()
+        await resolveShaderpacksForUI()
     }
 }
 
@@ -1169,36 +1172,40 @@ function bindShaderpackButton() {
 /**
  * Load the currently selected server information onto the mods tab.
  */
-function loadSelectedServerOnModsTab(){
-    const serv = DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer())
+async function loadSelectedServerOnModsTab(){
+    const serv = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
 
-    document.getElementById('settingsSelServContent').innerHTML = `
-        <img class="serverListingImg" src="${serv.getIcon()}"/>
-        <div class="serverListingDetails">
-            <span class="serverListingName">${serv.getName()}</span>
-            <span class="serverListingDescription">${serv.getDescription()}</span>
-            <div class="serverListingInfo">
-                <div class="serverListingVersion">${serv.getMinecraftVersion()}</div>
-                <div class="serverListingRevision">${serv.getVersion()}</div>
-                ${serv.isMainServer() ? `<div class="serverListingStarWrapper">
-                    <svg id="Layer_1" viewBox="0 0 107.45 104.74" width="20px" height="20px">
-                        <defs>
-                            <style>.cls-1{fill:#fff;}.cls-2{fill:none;stroke:#fff;stroke-miterlimit:10;}</style>
-                        </defs>
-                        <path class="cls-1" d="M100.93,65.54C89,62,68.18,55.65,63.54,52.13c2.7-5.23,18.8-19.2,28-27.55C81.36,31.74,63.74,43.87,58.09,45.3c-2.41-5.37-3.61-26.52-4.37-39-.77,12.46-2,33.64-4.36,39-5.7-1.46-23.3-13.57-33.49-20.72,9.26,8.37,25.39,22.36,28,27.55C39.21,55.68,18.47,62,6.52,65.55c12.32-2,33.63-6.06,39.34-4.9-.16,5.87-8.41,26.16-13.11,37.69,6.1-10.89,16.52-30.16,21-33.9,4.5,3.79,14.93,23.09,21,34C70,86.84,61.73,66.48,61.59,60.65,67.36,59.49,88.64,63.52,100.93,65.54Z"/>
-                        <circle class="cls-2" cx="53.73" cy="53.9" r="38"/>
-                    </svg>
-                    <span class="serverListingStarTooltip">Main Server</span>
-                </div>` : ''}
+    for(const el of document.getElementsByClassName('settingsSelServContent')) {
+        el.innerHTML = `
+            <img class="serverListingImg" src="${serv.rawServer.icon}"/>
+            <div class="serverListingDetails">
+                <span class="serverListingName">${serv.rawServer.name}</span>
+                <span class="serverListingDescription">${serv.rawServer.description}</span>
+                <div class="serverListingInfo">
+                    <div class="serverListingVersion">${serv.rawServer.minecraftVersion}</div>
+                    <div class="serverListingRevision">${serv.rawServer.version}</div>
+                    ${serv.rawServer.mainServer ? `<div class="serverListingStarWrapper">
+                        <svg id="Layer_1" viewBox="0 0 107.45 104.74" width="20px" height="20px">
+                            <defs>
+                                <style>.cls-1{fill:#fff;}.cls-2{fill:none;stroke:#fff;stroke-miterlimit:10;}</style>
+                            </defs>
+                            <path class="cls-1" d="M100.93,65.54C89,62,68.18,55.65,63.54,52.13c2.7-5.23,18.8-19.2,28-27.55C81.36,31.74,63.74,43.87,58.09,45.3c-2.41-5.37-3.61-26.52-4.37-39-.77,12.46-2,33.64-4.36,39-5.7-1.46-23.3-13.57-33.49-20.72,9.26,8.37,25.39,22.36,28,27.55C39.21,55.68,18.47,62,6.52,65.55c12.32-2,33.63-6.06,39.34-4.9-.16,5.87-8.41,26.16-13.11,37.69,6.1-10.89,16.52-30.16,21-33.9,4.5,3.79,14.93,23.09,21,34C70,86.84,61.73,66.48,61.59,60.65,67.36,59.49,88.64,63.52,100.93,65.54Z"/>
+                            <circle class="cls-2" cx="53.73" cy="53.9" r="38"/>
+                        </svg>
+                        <span class="serverListingStarTooltip">Main Server</span>
+                    </div>` : ''}
+                </div>
             </div>
-        </div>
-    `
+        `
+    }
 }
 
 // Bind functionality to the server switch button.
-document.getElementById('settingsSwitchServerButton').addEventListener('click', (e) => {
-    e.target.blur()
-    toggleServerSelection(true)
+Array.from(document.getElementsByClassName('settingsSwitchServerButton')).forEach(el => {
+    el.addEventListener('click', async e => {
+        e.target.blur()
+        await toggleServerSelection(true)
+    })
 })
 
 /**
@@ -1211,28 +1218,28 @@ function saveAllModConfigurations(){
 }
 
 /**
- * Function to refresh the mods tab whenever the selected
+ * Function to refresh the current tab whenever the selected
  * server is changed.
  */
-function animateModsTabRefresh(){
-    $('#settingsTabMods').fadeOut(150, () => {
-        prepareModsTab()
-        $('#settingsTabMods').fadeIn(150)
+function animateSettingsTabRefresh(){
+    $(`#${selectedSettingsTab}`).fadeOut(500, async () => {
+        await prepareSettings()
+        $(`#${selectedSettingsTab}`).fadeIn(500)
     })
 }
 
 /**
  * Prepare the Mods tab for display.
  */
-function prepareModsTab(first){
-    resolveModsForUI()
-    resolveDropinModsForUI()
-    resolveShaderpacksForUI()
+async function prepareModsTab(first){
+    await resolveModsForUI()
+    await resolveDropinModsForUI()
+    await resolveShaderpacksForUI()
     bindDropinModsRemoveButton()
     bindDropinModFileSystemButton()
     bindShaderpackButton()
     bindModsToggleSwitch()
-    loadSelectedServerOnModsTab()
+    await loadSelectedServerOnModsTab()
 }
 
 /**
@@ -1247,16 +1254,8 @@ const settingsMinRAMLabel     = document.getElementById('settingsMinRAMLabel')
 const settingsMemoryTotal     = document.getElementById('settingsMemoryTotal')
 const settingsMemoryAvail     = document.getElementById('settingsMemoryAvail')
 const settingsJavaExecDetails = document.getElementById('settingsJavaExecDetails')
-
-// Store maximum memory values.
-const SETTINGS_MAX_MEMORY = ConfigManager.getAbsoluteMaxRAM()
-const SETTINGS_MIN_MEMORY = ConfigManager.getAbsoluteMinRAM()
-
-// Set the max and min values for the ranged sliders.
-settingsMaxRAMRange.setAttribute('max', SETTINGS_MAX_MEMORY)
-settingsMaxRAMRange.setAttribute('min', SETTINGS_MIN_MEMORY)
-settingsMinRAMRange.setAttribute('max', SETTINGS_MAX_MEMORY)
-settingsMinRAMRange.setAttribute('min', SETTINGS_MIN_MEMORY )
+const settingsJavaReqDesc     = document.getElementById('settingsJavaReqDesc')
+const settingsJvmOptsLink     = document.getElementById('settingsJvmOptsLink')
 
 // Bind on change event for min memory container.
 settingsMinRAMRange.onchange = (e) => {
@@ -1268,7 +1267,7 @@ settingsMinRAMRange.onchange = (e) => {
     // Get reference to range bar.
     const bar = e.target.getElementsByClassName('rangeSliderBar')[0]
     // Calculate effective total memory.
-    const max = (os.totalmem()-1000000000)/1000000000
+    const max = os.totalmem()/1073741824
 
     // Change range bar color based on the selected value.
     if(sMinV >= max/1.25){
@@ -1300,7 +1299,7 @@ settingsMaxRAMRange.onchange = (e) => {
     // Get reference to range bar.
     const bar = e.target.getElementsByClassName('rangeSliderBar')[0]
     // Calculate effective total memory.
-    const max = (os.totalmem()-1000000000)/1000000000
+    const max = os.totalmem()/1073741824
 
     // Change range bar color based on the selected value.
     if(sMaxV >= max/1.65){
@@ -1428,8 +1427,8 @@ function updateRangedSlider(element, value, notch){
  * Display the total and available RAM.
  */
 function populateMemoryStatus(){
-    settingsMemoryTotal.innerHTML = Number((os.totalmem()-1000000000)/1000000000).toFixed(1) + 'G'
-    settingsMemoryAvail.innerHTML = Number(os.freemem()/1000000000).toFixed(1) + 'G'
+    settingsMemoryTotal.innerHTML = Number((os.totalmem()-1073741824)/1073741824).toFixed(1) + 'G'
+    settingsMemoryAvail.innerHTML = Number(os.freemem()/1073741824).toFixed(1) + 'G'
 }
 
 /**
@@ -1438,28 +1437,61 @@ function populateMemoryStatus(){
  * 
  * @param {string} execPath The executable path to populate against.
  */
-function populateJavaExecDetails(execPath){
-    const jg = new JavaGuard(DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion())
-    jg._validateJavaBinary(execPath).then(v => {
-        if(v.valid){
-            const vendor = v.vendor != null ? ` (${v.vendor})` : ''
-            if(v.version.major < 9) {
-                settingsJavaExecDetails.innerHTML = `Selected: Java ${v.version.major} Update ${v.version.update} (x${v.arch})${vendor}`
-            } else {
-                settingsJavaExecDetails.innerHTML = `Selected: Java ${v.version.major}.${v.version.minor}.${v.version.revision} (x${v.arch})${vendor}`
-            }
-        } else {
-            settingsJavaExecDetails.innerHTML = 'Invalid Selection'
-        }
-    })
+async function populateJavaExecDetails(execPath){
+    const server = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
+
+    const details = await validateSelectedJvm(ensureJavaDirIsRoot(execPath), server.effectiveJavaOptions.supported)
+
+    if(details != null) {
+        settingsJavaExecDetails.innerHTML = `Selected: Java ${details.semverStr} (${details.vendor})`
+    } else {
+        settingsJavaExecDetails.innerHTML = 'Invalid Selection'
+    }
+}
+
+function populateJavaReqDesc(server) {
+    settingsJavaReqDesc.innerHTML = `Requires Java ${server.effectiveJavaOptions.suggestedMajor} x64.`
+}
+
+function populateJvmOptsLink(server) {
+    const major = server.effectiveJavaOptions.suggestedMajor
+    settingsJvmOptsLink.innerHTML = `Available Options for Java ${major} (HotSpot VM)`
+    if(major >= 12) {
+        settingsJvmOptsLink.href = `https://docs.oracle.com/en/java/javase/${major}/docs/specs/man/java.html#extra-options-for-java`
+    }
+    else if(major >= 11) {
+        settingsJvmOptsLink.href = 'https://docs.oracle.com/en/java/javase/11/tools/java.html#GUID-3B1CE181-CD30-4178-9602-230B800D4FAE'
+    }
+    else if(major >= 9) {
+        settingsJvmOptsLink.href = `https://docs.oracle.com/javase/${major}/tools/java.htm`
+    }
+    else {
+        settingsJvmOptsLink.href = `https://docs.oracle.com/javase/${major}/docs/technotes/tools/${process.platform === 'win32' ? 'windows' : 'unix'}/java.html`
+    }
+}
+
+function bindMinMaxRam(server) {
+    // Store maximum memory values.
+    const SETTINGS_MAX_MEMORY = ConfigManager.getAbsoluteMaxRAM(server.rawServer.javaOptions?.ram)
+    const SETTINGS_MIN_MEMORY = ConfigManager.getAbsoluteMinRAM(server.rawServer.javaOptions?.ram)
+
+    // Set the max and min values for the ranged sliders.
+    settingsMaxRAMRange.setAttribute('max', SETTINGS_MAX_MEMORY)
+    settingsMaxRAMRange.setAttribute('min', SETTINGS_MIN_MEMORY)
+    settingsMinRAMRange.setAttribute('max', SETTINGS_MAX_MEMORY)
+    settingsMinRAMRange.setAttribute('min', SETTINGS_MIN_MEMORY)
 }
 
 /**
  * Prepare the Java tab for display.
  */
-function prepareJavaTab(){
-    bindRangeSlider()
+async function prepareJavaTab(){
+    const server = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
+    bindMinMaxRam(server)
+    bindRangeSlider(server)
     populateMemoryStatus()
+    populateJavaReqDesc(server)
+    populateJvmOptsLink(server)
 }
 
 /**
@@ -1635,18 +1667,17 @@ function prepareUpdateTab(data = null){
   * 
   * @param {boolean} first Whether or not it is the first load.
   */
-function prepareSettings(first = false) {
+async function prepareSettings(first = false) {
     if(first){
         setupSettingsTabs()
         initSettingsValidators()
         prepareUpdateTab()
     } else {
-        prepareModsTab()
+        await prepareModsTab()
     }
-    initSettingsValues()
+    await initSettingsValues()
     prepareAccountsTab()
-    prepareJavaTab()
-    prepareLauncherTab()
+    await prepareJavaTab()
     prepareAboutTab()
 }
 
