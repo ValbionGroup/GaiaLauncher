@@ -1,0 +1,314 @@
+#panels #account {
+    width: calc(100% - 38px);
+    -webkit-user-select: none;
+}
+
+p.accounts {
+    position: relative;
+    margin: 0px 0px 10px 0px;
+    font: normal normal bold 24px/35px Poppins;
+    color: var(--text);
+    transition: color .2s;
+
+    svg {
+        position: relative;
+        top: 5px;
+    }
+}
+
+div.accounts {
+    position: relative;
+    min-height: 1px;
+    display: flex;
+    flex-flow: wrap;
+}
+
+.account, .account-add {
+    position: relative;
+    display: inline-block;
+    width: 553px;
+    height: 110px;
+    background-color: var(--box);
+    border-radius: 14px;
+    transition: background-color .2s, border .2s;
+    margin-bottom: 10px;
+    margin-right: auto;
+    border: 2px solid var(--box);
+    cursor: pointer;
+
+    @media screen and (min-width: 1281px) {
+        margin-right: 14px;
+    }
+
+    &:hover {
+        background-color: var(--box-hover);
+    }
+
+    &.active {
+        border: 2px solid var(--color);
+    }
+
+    .acc-image {
+        position: absolute;
+        border-radius: 31px;
+        top: 24px;
+        left: 30px;
+        width: 62px;
+        height: 62px;
+        pointer-events: none;
+    }
+
+    .acc-username {
+        position: absolute;
+        top: 22px;
+        left: 120px;
+        font: normal normal bold 24px/35px Poppins;
+        transition: color .2s;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        max-width: 20ch;
+        pointer-events: none;
+    }
+
+    .acc-email {
+        position: absolute;
+        top: 55px;
+        left: 120px;
+        font: normal normal normal 18px/27px Poppins;
+        transition: color .2s;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        max-width: 29ch;
+        pointer-events: none;
+    }
+
+    .acc-delete {
+        position: absolute;
+        top: 50%;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 30px;
+        transform: translate(0, -50%);
+        color: var(--account-delete);
+        transition: color .2s, background-color .2s;
+
+        &:hover {
+            background-color: #CF442D20;
+        }
+
+        &:before {
+            position: relative;
+            margin: 11px;
+            width: 38px;
+            height: 38px;
+            font-size: 38px;
+        }
+    }
+
+    .acc-add {
+        position: absolute;
+        top: 50%;
+        left: 42px;
+        transform: translate(0, -50%);
+        color: var(--text);
+        transition: color .2s;
+
+        &:before {
+            position: relative;
+            width: 38px;
+            height: 38px;
+            font-size: 38px;
+        }
+    }
+
+    .acc-add-text {
+        position: absolute;
+        top: 50%;
+        left: 120px;
+        transform: translate(0, -50%);
+        font: normal normal bold 24px/35px Poppins;
+        color: var(--text);
+        transition: color .2s;
+    }
+}
+
+/* connection */
+
+.connect-bg {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    background-color: var(--popup-bg);
+    transition: background-color .2s, opacity .2s;
+
+    pointer-events: none;
+    opacity: 0;
+
+    &.show {
+        pointer-events: all;
+        opacity: 1;
+    }
+
+    .connect {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 430px;
+        background-color: var(--background);
+        transition: background-color .2s, opacity .2s;
+        padding: 25px 10px;
+        border-radius: 10px;
+
+        .title {
+            position: relative;
+            display: block;
+            left: 50%;
+            transform: translate(-50%);
+            width: fit-content;
+            margin-top: -15px;
+            font: normal normal bold 20px/30px Poppins;
+            color: var(--text);
+            transition: color .2s;
+            user-select: none;
+
+            &:before {
+                position: relative;
+                top: 10px;
+                margin-right: 15px;
+                width: 38px;
+                height: 38px;
+                font-size: 38px;
+            }
+        }
+
+        .description {
+            position: relative;
+            width: 430px;
+            text-align: center;
+            margin-top: 15px;
+            font: normal normal normal 14px/21px Poppins;
+            color: var(--text);
+            transition: color .2s;
+        }
+
+        .textbox {
+            position: relative;
+            left: 50%;
+            transform: translate(-50%);
+            width: 300px;
+            height: 32px;
+            border-radius: 16px;
+            font: normal normal normal 14px/21px Poppins;
+            color: var(--text);
+            background-color: var(--box-button);
+            transition: color .2s, background-color .2s;
+            padding: 0 16px;
+
+            border: none;
+            outline: none;
+
+            &.error {
+                border: 2px solid var(--red);
+            }
+        }
+
+        .name {
+            position: relative;
+            left: 65px;
+            margin: 25px 0px 3px 0px;
+            font: normal normal normal 13px/18px Poppins;
+            color: var(--text);
+            transition: color .2s;
+            user-select: none;
+        }
+
+        .links {
+            position: relative;
+            width: 300px;
+            height: 18px;
+            margin-top: 20px;
+            left: 50%;
+            transform: translate(-50%);
+            user-select: none;
+
+            &>div:hover {
+                text-decoration: underline;
+            }
+        }
+
+        .forgot {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            font: normal normal normal 13px/18px Poppins;
+            color: var(--text);
+            transition: color .2s;
+            cursor: pointer
+        }
+
+        .buy {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            font: normal normal normal 13px/18px Poppins;
+            color: var(--text);
+            transition: color .2s;
+            cursor: pointer;
+        }
+
+        .button {
+            position: relative;
+            left: 50%;
+            transform: translate(-50%);
+            margin-top: 25px;
+            padding: 12px 24px;
+            font: normal normal bold 20px/25px Poppins;
+            background-color: var(--box-button-gradient-1);
+            background-image: linear-gradient(180deg, var(--box-button-gradient-1) 0%, var(--box-button-gradient-2) 100%);
+            cursor: pointer;
+            color: var(--button-text);
+            transition: filter .2s;
+            border-radius: 24px;
+
+            border: none;
+            outline: none;
+
+            &:hover {
+                filter: brightness(1.05);
+            }
+        }
+
+        .connect-close {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            width: 30px;
+            height: 30px;
+            border-radius: 15px;
+            color: var(--text);
+            background-color: #00000000;
+            transition: color .2s, background-color .2s;
+            cursor: pointer;
+
+            &:hover {
+                background-color: var(--frame);
+            }
+
+            &:before {
+                position: relative;
+                top: 7.5px;
+                left: 7.5px;
+                width: 15px;
+                height: 15px;
+                font-size: 15px;
+            }
+        }
+    }
+}

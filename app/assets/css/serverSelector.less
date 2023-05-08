@@ -1,0 +1,158 @@
+.serverSelector-bg {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    background-color: var(--popup-bg);
+    transition: background-color .2s, opacity .2s;
+
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+
+    &.show {
+        pointer-events: all;
+        user-select: text;
+        opacity: 1;
+        z-index: 7;
+    }
+
+    .serverSelector {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60%;
+        height: 75%;
+        background-color: var(--background);
+        transition: background-color .2s, opacity .2s;
+        padding: 20px;
+        border-radius: 10px;
+
+        .serverSelector-close {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 30px;
+            height: 30px;
+            border-radius: 15px;
+            color: var(--text);
+            background-color: #00000000;
+            transition: color .2s, background-color .2s;
+            cursor: pointer;
+            z-index: 8;
+
+            &:hover {
+                background-color: var(--frame);
+            }
+
+            &:before {
+                position: relative;
+                top: 7.5px;
+                left: 7.5px;
+                width: 15px;
+                height: 15px;
+                font-size: 15px;
+            }
+        }
+
+        .serverSelector-content {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+
+            .title {
+                position: relative;
+                font: normal normal bold 20px/30px Poppins;
+                color: var(--text);
+                transition: color .2s;
+            }
+
+            .serverDropdown {
+                position: relative;
+                margin-top: 12px;
+                border-radius: 10px;
+                background-color: var(--box);
+                transition: background-color .2s, border .2s;
+
+                &:hover {
+                    background-color: var(--box-hover);
+                }
+
+                &.active {
+                    border: 2px solid var(--color);
+                }
+
+                .header {
+                    position: relative;
+                    top: 0px;
+                    left: 0px;
+                    height: 70px;
+                    width: 100%;
+                    cursor: pointer;
+
+                    .img {
+                        position: absolute;
+                        top: 20px;
+                        left: 20px;
+                        width: 30px;
+                        height: 30px;
+                        color: var(--text);
+                        transition: color .2s;
+                        pointer-events: none;
+                        border-radius: 10px;
+                    }
+
+                    .name {
+                        position: absolute;
+                        top: 16px;
+                        left: 70px;
+                        font: normal normal bold 16px/26px Poppins;
+                        color: var(--text);
+                        transition: color .2s;
+                        pointer-events: none;
+                    }
+
+                    .desc {
+                        position: absolute;
+                        top: 34px;
+                        left: 70px;
+                        font: normal normal normal 12px/20px Poppins;
+                        color: var(--text);
+                        transition: color .2s;
+                        pointer-events: none;
+                        text-overflow: ellipsis;
+						white-space: nowrap;
+                        overflow: hidden;
+                        max-width: calc(100% - 170px);
+                    }
+
+                    .version {
+                        position: absolute;
+                        top: 15px;
+                        right: 20px;
+                        width: 80px;
+                        height: 40px;
+                        background-color: var(--news-bg);
+                        border-radius: 10px;
+                        transition: color .2s, transform .2s;
+                        pointer-events: none;
+
+                        .text {
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            font: normal normal bold 13px/15px Poppins;
+                            letter-spacing: 0px;
+                            color: var(--text);
+                            transition: color .2s;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

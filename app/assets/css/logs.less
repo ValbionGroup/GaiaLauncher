@@ -1,0 +1,184 @@
+.log-bg {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    background-color: var(--popup-bg);
+    transition: background-color .2s, opacity .2s;
+
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+
+    &.show {
+        pointer-events: all;
+        user-select: text;
+        opacity: 1;
+        z-index: 7;
+    }
+
+    .log {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60%;
+        height: 75%;
+        background-color: var(--background);
+        transition: background-color .2s, opacity .2s;
+        padding: 20px;
+        border-radius: 10px;
+
+        .log-close {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 30px;
+            height: 30px;
+            border-radius: 15px;
+            color: var(--text);
+            background-color: #00000000;
+            transition: color .2s, background-color .2s;
+            cursor: pointer;
+            z-index: 8;
+
+            &:hover {
+                background-color: var(--frame);
+            }
+
+            &:before {
+                position: relative;
+                top: 7.5px;
+                left: 7.5px;
+                width: 15px;
+                height: 15px;
+                font-size: 15px;
+            }
+        }
+
+        .log-content {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+
+            .title {
+                position: relative;
+                font: normal normal bold 20px/30px Poppins;
+                color: var(--text);
+                transition: color .2s;
+            }
+
+            .logger {
+                position: relative;
+                margin-top: 12px;
+                width: 100%;
+                border-radius: 10px;
+                background-color: var(--box);
+
+                .header {
+                    position: relative;
+                    top: 0px;
+                    left: 0px;
+                    height: 70px;
+                    width: 100%;
+                    cursor: pointer;
+
+                    .icon {
+                        position: absolute;
+                        top: 20px;
+                        left: 20px;
+                        width: 30px;
+                        height: 30px;
+                        color: var(--text);
+                        transition: color .2s;
+                        pointer-events: none;
+
+                        &:before {
+                            width: 30px;
+                            height: 30px;
+                            font-size: 30px;
+                        }
+                    }
+
+                    .type {
+                        position: absolute;
+                        top: 22px;
+                        left: 70px;
+                        font: normal normal bold 16px/26px Poppins;
+                        color: var(--text);
+                        transition: color .2s;
+                        pointer-events: none;
+                    }
+
+                    .expand {
+                        position: absolute;
+                        top: 15px;
+                        right: 20px;
+                        width: 40px;
+                        height: 40px;
+                        transform: rotate(180deg);
+                        color: var(--icon-unselected);
+                        transition: color .2s, transform .2s;
+                        pointer-events: none;
+
+                        &:before {
+                            width: 40px;
+                            height: 40px;
+                            font-size: 40px;
+                        }
+                    }
+                }
+
+                .content {
+                    position: relative;
+                    top: -8px;
+                    padding: 0 20px 0 20px;
+                    width: 100%;
+                    transition: height .2s, top .2s;
+                    pointer-events: none;
+                    z-index: 0;
+                    font: normal normal normal 16px/25px Consolas;
+                    transition: color .2s, line-height .2s, opacity .2s;
+                    line-height: 0px;
+                    opacity: 0;
+                    user-select: text;
+
+                    .info {
+                        color: var(--text);
+                    }
+
+                    .warn {
+                        color: #f46800;
+                    }
+
+                    .debug {
+                        color: #3dacee;
+                    }
+
+                    .error {
+                        color: #a30000;
+                    }
+                }
+
+                &.open {
+                    .header {
+                        .expand {
+                            transform: rotate(0deg);
+                        }
+                    }
+
+                    .content {
+                        top: 0px;
+                        padding: 0 20px 20px 20px;
+                        pointer-events: all;
+                        z-index: 1;
+                        line-height: 1.6em;
+                        opacity: 1;
+                    }
+                }
+            }
+        }
+    }
+}

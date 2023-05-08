@@ -1,0 +1,70 @@
+.update-box {
+    position: relative;
+    margin: 12px 25px 0 0;
+    width: 100%;
+    border-radius: 10px;
+    background-color: var(--box);
+
+
+    &.update {
+        background-color: var(--box-button-gradient-1);
+        background-image: linear-gradient(145deg, var(--box-button-gradient-1) 0%, var(--box-button-gradient-2) 150%);
+
+        div {
+            color: var(--icon-active) !important;
+        }
+    }
+
+    &.new-update {
+        background-color: var(--orange) !important;
+    }
+
+    .content {
+        position: relative;
+        top: 0px;
+        left: 0px;
+        height: 70px;
+        width: 100%;
+
+        .icon {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 30px;
+            height: 30px;
+            color: var(--text);
+            transition: color .2s;
+            pointer-events: none;
+
+            &:before {
+                width: 30px;
+                height: 30px;
+                font-size: 30px;
+            }
+        }
+
+		.main-text {
+            position: absolute;
+            top: 11px;
+            left: 70px;
+            font: normal normal bold 16px/25px Poppins;
+            color: var(--text);
+            transition: color .2s;
+            pointer-events: none;
+
+			&.single-line {
+				top: 22px;
+			}
+        }
+
+        .secondary-text {
+            position: absolute;
+            top: 32px;
+            left: 70px;
+            font: normal normal normal 16px/25px Poppins;
+            color: var(--text);
+            transition: color .2s;
+            pointer-events: none;
+        }
+    }
+}
