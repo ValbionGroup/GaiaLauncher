@@ -9,8 +9,6 @@ const account = document.getElementsByClassName('account-side');
 const isUserConnected = document.getElementById('isConnected');
 const sidePlay = document.getElementById('play-button');
 
-const loggerSidebar = LoggerUtil('[Sidebar]');
-
 let activeBtn = document.querySelector('#serverBtn.button');
 let settings = document.getElementById('settingsBtn');
 
@@ -47,7 +45,7 @@ function buttonClicked(button) {
 	activeBtn.classList.toggle('active');
 	button.classList.toggle('active');
 	activeBtn = button;
-	loggerSidebar.log(`Switched to ${button.id.substr(0, button.id.length-3)} panel`);
+	console.log(`Switched to ${button.id.substr(0, button.id.length-3)} panel`);
 	switchView(getCurrentView(), VIEWS[button.id.substr(0, button.id.length-3)]);
 }
 
@@ -73,6 +71,3 @@ account.onclick = function () {
 sidePlay.addEventListener("click", () => {
 	LauncherScript.launchGame() 
 });
-
-
-loggerSidebar.info('Sidebar initialized');
