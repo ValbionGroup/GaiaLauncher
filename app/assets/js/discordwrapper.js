@@ -1,101 +1,44 @@
-const logger = require('./loggerutil')('%c[DiscordWrapper]', 'color: #7289da; font-weight: bold')
+// Work in progress
+const { LoggerUtil } = require('gaialauncher-core')
 
-const {Client} = require('discord-rpc-patch')
+const logger = LoggerUtil.getLogger('DiscordWrapper')
+
+const { Client } = require('discord-rpc-patch')
 
 let client
 let activity
 
-exports.initRPC = function(genSettings, initialDetails = 'Attente du client..'){
+exports.initRPC = function(genSettings, servSettings, initialDetails = 'Chargement du jeu...'){
     client = new Client({ transport: 'ipc' })
 
     activity = {
         details: initialDetails,
-        largeImageKey: genSettings.smallImageKey,
-        largeImageText: genSettings.smallImageText,
-        startTimestamp: new Date().getTime(),
-        instance: false
-    }
-
-    client.on('ready', () => {
-        logger.log('Discord RPC Connected')
-        client.setActivity(activity)
-    })
-    
-    client.login({clientId: genSettings.clientId}).catch(error => {
-        if(error.message.includes('ENOENT')) {
-            logger.log('Unable to initialize Discord Rich Presence, no client detected.')
-        } else {
-            logger.log('Unable to initialize Discord Rich Presence: ' + error.message, error)
-        }
-    })
-}
-
-exports.updateState = function(state){
-    activity.state = state
-    client.setActivity(activity)
-    logger.log('Updated discord state to: ' + state)
-}
-
-exports.clearState = function(){
-    activity = {
-        details: activity.details,
-        largeImageKey: activity.largeImageKey,
-        largeImageText: activity.largeImageText,
-        startTimestamp: activity.startTimestamp,
-        instance: activity.instance
-    }
-    client.setActivity(activity)
-    logger.log('Cleared the activity state!')
-}
-
-exports.startGamePresence = function(genSettings, servSettings){
-    activity = {
-        details: 'Chargement du jeu...',
         state: '> Sur ' + servSettings.shortId,
         largeImageKey: servSettings.largeImageKey,
         largeImageText: servSettings.largeImageText,
         smallImageKey: genSettings.smallImageKey,
         smallImageText: genSettings.smallImageText,
         startTimestamp: new Date().getTime(),
-        instance: activity.instance
+        instance: false
     }
-    client.setActivity(activity)
-    logger.log('Started game presence!')
-}
 
-exports.stopGamePresence = function(genSettings, initialDetails){
-    activity = {
-        details: initialDetails,
-        largeImageKey: genSettings.smallImageKey,
-        largeImageText: genSettings.smallImageText,
-        startTimestamp: new Date().getTime(),
-        instance: activity.instance
-    }
-    client.setActivity(activity)
-    logger.log('Cleared the game activity!')
+    client.on('ready', () => {
+        logger.info('Discord RPC Connected')
+        client.setActivity(activity)
+    })
+    
+    client.login({clientId: genSettings.clientId}).catch(error => {
+        if(error.message.includes('ENOENT')) {
+            logger.info('Unable to initialize Discord Rich Presence, no client detected.')
+        } else {
+            logger.info('Unable to initialize Discord Rich Presence: ' + error.message, error)
+        }
+    })
 }
 
 exports.updateDetails = function(details){
     activity.details = details
     client.setActivity(activity)
-    logger.log('Updated discord details to: ' + details)
-}
-
-exports.clearDetails = function(){
-    activity = {
-        state: activity.state,
-        largeImageKey: activity.largeImageKey,
-        largeImageText: activity.largeImageText,
-        startTimestamp: activity.startTimestamp,
-        instance: activity.instance
-    }
-    logger.log('Cleared the activity details!')
-}
-
-exports.resetTime = function(){
-    activity.startTimestamp = new Date().getTime()
-    client.setActivity(activity)
-    logger.log('Reset the activity time!')
 }
 
 exports.shutdownRPC = function(){
