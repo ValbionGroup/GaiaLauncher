@@ -16,12 +16,16 @@ let fatalStartupError = false
 
 // Mapping of each view to their container IDs.
 const VIEWS = {
-    landing: '#landingContainer',
-    loginOptions: '#loginOptionsContainer',
-    login: '#loginContainer',
-    settings: '#settingsContainer',
-    welcome: '#welcomeContainer',
-    waiting: '#waitingContainer'
+    logger: '#logger',
+    login: '#login',
+    server: '#server',
+    account: '#account',
+    launcher: '#launcher',
+    start: '#start',
+    mods: '#mods',
+    update: '#update',
+    popup: '#popup',
+    welcome: '#welcome',
 }
 
 // The currently shown view container.
@@ -39,14 +43,21 @@ let currentView
  * @param {*} onNextFade Optional. Callback function to execute when the next view
  * fades in.
  */
-function switchView(current, next, currentFadeTime = 500, nextFadeTime = 500, onCurrentFade = () => {}, onNextFade = () => {}){
+function switchView(current, next, onCurrentFade = () => {}, onNextFade = () => {}){
     currentView = next
-    $(`${current}`).fadeOut(currentFadeTime, async () => {
-        await onCurrentFade()
-        $(`${next}`).fadeIn(nextFadeTime, async () => {
-            await onNextFade()
-        })
+    
+    $(`${next}`).show(() => {
+        onNextFade()
     })
+
+    $(`${current}`).toggleClass('active')
+    $(`${next}`).toggleClass('active')
+    
+    onCurrentFade()
+
+    setTimeout(() => {
+        $(`${current}`).hide()
+    }, 200)
 }
 
 /**
@@ -68,10 +79,10 @@ async function showMainUI(data){
     await prepareSettings(true)
     updateSelectedServer(data.getServerById(ConfigManager.getSelectedServer()))
     refreshServerStatus()
+    parseNews()
     setTimeout(() => {
-        document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
-        document.body.style.backgroundImage = `url('assets/images/backgrounds/${document.body.getAttribute('bkid')}.jpg')`
-        $('#main').show()
+        $('#main').fadeIn(200)
+        document.getElementById('frameBar').style.display = ''
 
         const isLoggedIn = Object.keys(ConfigManager.getAuthAccounts()).length > 0
 
@@ -84,46 +95,36 @@ async function showMainUI(data){
         if(ConfigManager.isFirstLaunch()){
             currentView = VIEWS.welcome
             $(VIEWS.welcome).fadeIn(1000)
+            $(VIEWS.welcome).toggleClass('active')
         } else {
-            if(isLoggedIn){
-                currentView = VIEWS.landing
-                $(VIEWS.landing).fadeIn(1000)
-            } else {
-                loginOptionsCancelEnabled(false)
-                loginOptionsViewOnLoginSuccess = VIEWS.landing
-                loginOptionsViewOnLoginCancel = VIEWS.loginOptions
-                currentView = VIEWS.loginOptions
-                $(VIEWS.loginOptions).fadeIn(1000)
-            }
+            currentView = VIEWS.server
+            $(VIEWS.server).fadeIn(1000)
+            $(VIEWS.server).toggleClass('active')
         }
 
         setTimeout(() => {
-            $('#loadingContainer').fadeOut(500, () => {
+            $('#loadingContainer').fadeOut(150, () => {
                 $('#loadSpinnerImage').removeClass('rotating')
             })
         }, 250)
         
     }, 750)
-    // Disable tabbing to the news container.
-    initNews().then(() => {
-        $('#newsContainer *').attr('tabindex', '-1')
-    })
 }
 
 function showFatalStartupError(){
     setTimeout(() => {
-        $('#loadingContainer').fadeOut(250, () => {
-            document.getElementById('overlayContainer').style.background = 'none'
-            setOverlayContent(
-                'Erreur fatale : Impossible de charger l\'index de distribution',
-                'Une connexion n\'a pas pu être établie avec nos serveurs pour télécharger l\'index de distribution. Aucune copie locale n\'était disponible pour le chargement.<br><br>L\'index de distribution est un fichier essentiel qui fournit les dernières informations sur le serveur. Le lanceur est incapable de démarrer sans lui. Assurez-vous que vous êtes connecté à Internet et relancez l\'application.',
+        $('#loadingContainer').fadeOut(150, () => {
+            setPopupContent(
+                'Impossible de charger l\'index de distribution',
+                'Une connexion n\'a pas pu être établie avec nos serveurs pour télécharger l\'index de distribution. Aucune copie locale n\'était disponible pour le chargement.<br><br>L\'index de distribution est un fichier essentiel qui fournit les dernières informations sur le serveur. Le lanceur est incapable de démarrer sans lui. Assurez-vous que vous êtes connecté à Internet et relancez l\'application.<br>Si vous êtes connecté à Internet et que vous voyez ce message, cela signifie que nos serveurs sont actuellement indisponibles.',
+                'warning',
                 'Fermer'
             )
-            setOverlayHandler(() => {
+            setPopupHandler(() => {
                 const window = remote.getCurrentWindow()
                 window.close()
             })
-            toggleOverlay(true)
+            togglePopup(true)
         })
     }, 750)
 }
@@ -136,7 +137,7 @@ function showFatalStartupError(){
 function onDistroRefresh(data){
     updateSelectedServer(data.getServerById(ConfigManager.getSelectedServer()))
     refreshServerStatus()
-    initNews()
+    parseNews()
     syncModConfigurations(data)
     ensureJavaSettings(data)
 }
@@ -332,13 +333,14 @@ async function validateSelectedAccount(){
             ConfigManager.removeAuthAccount(selectedAcc.uuid)
             ConfigManager.save()
             const accLen = Object.keys(ConfigManager.getAuthAccounts()).length
-            setOverlayContent(
-                'Failed to Refresh Login',
-                `We were unable to refresh the login for <strong>${selectedAcc.displayName}</strong>. Please ${accLen > 0 ? 'select another account or ' : ''} login again.`,
-                'Login',
-                'Select Another Account'
+            setPopupContent(
+                'Impossible de rafraîchir le compte sélectionné',
+                `Nous n'avons pas pu rafraîchir la connexion pour <strong>${selectedAcc.displayName}</strong>.<br/><br/>Veuillez ${accLen > 0 ? 'sélectionner un autre compte ou ' : ''} vous connecter à nouveau.`,
+                'information',
+                'Connexion',
+                'Sélectionner un compte',
             )
-            setOverlayHandler(() => {
+            setPopupHandler(() => {
 
                 const isMicrosoft = selectedAcc.type === 'microsoft'
 
@@ -352,7 +354,7 @@ async function validateSelectedAccount(){
                 }
                 
                 loginOptionsViewOnLoginSuccess = getCurrentView()
-                loginOptionsViewOnLoginCancel = VIEWS.loginOptions
+                loginOptionsViewOnLoginCancel = VIEWS.account
 
                 if(accLen > 0) {
                     loginOptionsViewOnCancel = getCurrentView()
@@ -373,29 +375,15 @@ async function validateSelectedAccount(){
                         ConfigManager.save()
                         validateSelectedAccount()
                     }
-                    loginOptionsCancelEnabled(true)
-                } else {
-                    loginOptionsCancelEnabled(false)
                 }
-                toggleOverlay(false)
-                switchView(getCurrentView(), VIEWS.loginOptions)
+                togglePopup(false)
+                switchView(getCurrentView(), VIEWS.account)
             })
             setDismissHandler(() => {
-                if(accLen > 1){
-                    prepareAccountSelectionList()
-                    $('#overlayContent').fadeOut(250, () => {
-                        bindOverlayKeys(true, 'accountSelectContent', true)
-                        $('#accountSelectContent').fadeIn(250)
-                    })
-                } else {
-                    const accountsObj = ConfigManager.getAuthAccounts()
-                    const accounts = Array.from(Object.keys(accountsObj), v => accountsObj[v])
-                    // This function validates the account switch.
-                    setSelectedAccount(accounts[0].uuid)
-                    toggleOverlay(false)
-                }
+                togglePopup(false)
+                switchView(getCurrentView(), VIEWS.account)
             })
-            toggleOverlay(true, accLen > 0)
+            togglePopup(true, accLen > 0)
         } else {
             return true
         }
