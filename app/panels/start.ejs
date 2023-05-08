@@ -1,0 +1,134 @@
+<div id="start" style="display: none;">
+	<div class="panel-title">Démarrage</div>
+	<p class="description">Configurer les options de démarrage du jeu.</p>
+	<div class="setting-box" id="memory">
+		<div class="header">
+			<div class="icon icon-memory"></div>
+			<div class="title">Mémoire RAM</div>
+			<div class="description">Gérer la quantité de RAM que va allouer votre système à Minecraft.</div>
+			<div class="expand icon-expand"></div>
+		</div>
+		<div class="content">
+			<div class="information">
+				Plus cette quantité est importante, plus votre jeu sera stable et aura de bonnes performances.<br>
+				Toutefois, même si vous avez beaucoup de RAM disponible sur votre ordinateur, il est inutile d'en
+				allouer une très grande quantité.<br><br>
+				<b>- RAM Maximale :</b> Indique la quantité totale de RAM allouée à Minecraft. Il est recommandé de ne
+				pas dépasser 50% de la quantité totale de RAM présente sur votre PC afin qu'il puisse fonctionner
+				correctement. Si votre ordinateur a plus de 8Go de RAM, nous vous recommandons d'allouer 6Go. Si votre
+				ordinateur a 4Go ou moins, n'allouez pas plus de 3Go.<br><br>
+				<b>- RAM Minimale :</b> Indique la quantité minimale de RAM allouée au démarrage de Minecraft. Il est
+				recommandé de ne pas mettre plus de 3Go pour cette valeur. La valeur typique est de 1Go.
+			</div>
+			<div id="memory-slider" min="0.5" max="8" step="0.5" class="slider">
+				<div class="slider-touch-left">
+					<span value="0 Go"></span>
+				</div>
+				<div class="slider-touch-right">
+					<span value="0 Go"></span>
+				</div>
+				<div class="slider-line">
+					<span></span>
+				</div>
+			</div>
+			<div class="ram-info">
+				<b>RAM totale sur votre ordinateur :</b> <span id="total-ram">0 Go</span><br>
+				<b>RAM disponible :</b> <span id="free-ram">0 Go</span>
+			</div>
+		</div>
+	</div>
+	<div class="setting-box">
+		<div class="header">
+			<div class="icon icon-java"></div>
+			<div class="title">Exécutable Java</div>
+			<div class="description">Indiquer au launcher l'emplacement de l'exécutable Java.</div>
+			<div class="expand icon-expand"></div>
+		</div>
+		<div class="content">
+			<div class="information">
+				<!-- Le launcher utilise une version embarquée de Java.<br>
+				Cette version est disponible dans le répertoire <span id="info-path"></span>.<br>
+				Toutefois, vous pouvez spécifier votre propre exécutable. -->
+				L'emplacement est vérifier au lancement du jeu.
+				Java doit être java 8 ou supérieur en 64 bit.<br/>
+				Le chemin d'accès doit terminer par <b>bin\javaw.exe</b>
+			</div>
+			<input type="text" value="" class="path" id="path" disabled />
+			<input type="button" value="Changer" class="path-button" />
+			<input type="file" id="path-file" class="fake" accept="application/octet-stream" />
+		</div>
+	</div>
+	<div class="setting-box">
+		<div class="header">
+			<div class="icon icon-monitor"></div>
+			<div class="title">Résolution</div>
+			<div class="description">Modifier la résolution de votre jeu au lancement.</div>
+			<div class="expand icon-expand"></div>
+		</div>
+		<div class="content">
+			<div class="information">
+				Définissez une résolution personnalisée ou choisissez-en une dans la liste en fonction de la taille de
+				votre écran.<br>
+				Vous pouvez aussi faire démarrer Minecraft automatiquement en plein écran.
+			</div>
+			<div class="size">
+				<input type="text" maxlength="4" class="size-text" cValue="GameWidth" id="width" />
+				<div class="size-cross icon-close"></div>
+				<input type="text" maxlength="4" class="size-text" cValue="GameHeight" id="height" />
+				<div class="select-wrap icon-monitor">
+					<select id="select" class="select">
+						<option disabled selected value style="display: none">
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pré-config</option>
+						<optgroup label="Ratio 4:3">
+							<option value="640 x 480">640 x 480</option>
+							<option value="800 x 600">800 x 600</option>
+							<option value="1024 x 768">1024 x 768</option>
+							<option value="1280 x 960">1280 x 960</option>
+							<option value="1280 x 1024">1280 x 1024</option>
+						</optgroup>
+						<optgroup label="Ratio 16:9">
+							<option value="854 x 480">854 x 480</option>
+							<option value="1280 x 720">1280 x 720</option>
+							<option value="1360 x 768">1360 x 768</option>
+							<option value="1600 x 900">1600 x 900</option>
+							<option value="1920 x 1080">1920 x 1080</option>
+						</optgroup>
+						<optgroup label="Ratio 16:10">
+							<option value="1280 x 768">1280 x 768</option>
+							<option value="1280 x 800">1280 x 800</option>
+							<option value="1440 x 900">1440 x 900</option>
+							<option value="1600 x 1024">1600 x 1024</option>
+							<option value="1680 x 1050">1680 x 1050</option>
+						</optgroup>
+					</select>
+				</div>
+			</div>
+			<div class="fullscreen" style="margin-bottom: 0px"><input type="checkbox" class="checkbox" id="consoleOnLaunch">
+				<label for="consoleOnLaunch">
+					<div class="checkround"></div>
+				</label>
+				Démarrer Minecraft en plein écran
+			</div>
+		</div>
+	</div>
+	<div class="setting-box">
+		<div class="header">
+			<div class="icon icon-play"></div>
+			<div class="title">Après le lancement</div>
+			<div class="description">Sélectionner ce que va faire le launcher après le lancement.</div>
+			<div class="expand icon-expand"></div>
+		</div>
+		<div class="content">
+			<div class="information" style="margin-bottom: 0px">
+				<input type="checkbox" class="checkbox" id="checkbox_open"><label for="checkbox_open">
+					<div class="checkround"></div>
+				</label><b>Garder le launcher ouvert :</b> Le launcher restera ouvert après le lancement du jeu.<br>
+				<input type="checkbox" class="checkbox" id="checkbox_close"><label for="checkbox_close">
+					<div class="checkround"></div>
+				</label><b>Fermer le launcher :</b> Le Launcher tournera en arrière-plan, mais ne sera pas affiché sur
+				votre écran. Si une erreur se produit ou que votre jeu se ferme, il se fermera complètement.
+			</div>
+		</div>
+	</div>
+	<script src="./assets/js/scripts/panels/start.js"></script>
+</div>
