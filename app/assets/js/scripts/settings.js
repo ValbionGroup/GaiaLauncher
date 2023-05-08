@@ -142,6 +142,8 @@ async function initSettingsValues(){
                         await populateJavaExecDetails(v.value)
                     } else if (cVal === 'DataDirectory'){
                         v.value = gFn.apply(null, gFnOpts)
+                    } else if (cVal === 'ServerCode'){
+                        v.value = gFn()
                     } else if(cVal === 'JVMOptions'){
                         v.value = gFn.apply(null, gFnOpts).join(' ')
                     } else {
@@ -460,6 +462,8 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
                 ConfigManager.getServerCodes().push(code)
                 ConfigManager.save()
                 prepareLauncherTab()
+            } else {
+                console.warn('Server code already exists or is empty!')
             }
         }
     }
@@ -722,8 +726,8 @@ function prepareAccountsTab() {
 /**
  * Prepare the launcher tab for display.
  */
- function prepareLauncherTab() {
-    resolveServerCodesForUI()
+async function prepareLauncherTab() {
+    await resolveServerCodesForUI()
     bindServerCodeButtons()
 }
 
@@ -929,11 +933,11 @@ async function resolveDropinModsForUI(){
     document.getElementById('settingsDropinModsContent').innerHTML = dropinMods
 }
 
-function resolveServerCodesForUI(){
+async function resolveServerCodesForUI(){
     /* Server Codes */
     let servCodes = ''
-    /* for(let servCode of ConfigManager.getServerCodes()){
-        const servs = DistroManager.getDistribution().getServersFromCode(servCode)
+    for(let servCode of ConfigManager.getServerCodes()){
+        const servs = (await DistroAPI.getDistribution()).getServersFromCode(servCode)
         const valid = servs && servs.length
         servCodes +=
             `
@@ -953,7 +957,7 @@ function resolveServerCodesForUI(){
                     </div>
                 </div>
             `
-    } */
+    }
 
     document.getElementById('settingsServerCodesListContent').innerHTML = servCodes
 
@@ -961,15 +965,13 @@ function resolveServerCodesForUI(){
     for(let ele of document.getElementsByClassName('settingsServerCodeServerNamesContent')){
         servNames = ''
         const code = ele.getAttribute('code')
-        const servs = DistroManager.getDistribution().getServersFromCode(code)
+        const servs = (await DistroAPI.getDistribution()).getServersFromCode(code)
         const valid = servs && servs.length
-        loggerSettings.log('valid: ' + valid)
         if(valid){
             for(let serv of servs){
-                loggerSettings.log('server: ' + serv.getName())
                 servNames +=
                     `
-                    <span class="settingsServerCodeServerName">${serv.getName()}</span> 
+                    <span class="settingsServerCodeServerName">${serv.rawServer.name}</span> 
                     `
             }
         } else {
@@ -1675,6 +1677,7 @@ async function prepareSettings(first = false) {
     prepareAccountsTab()
     await prepareJavaTab()
     prepareAboutTab()
+    await prepareLauncherTab()
 }
 
 // Prepare the settings UI on startup.

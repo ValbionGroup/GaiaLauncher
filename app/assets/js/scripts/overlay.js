@@ -273,6 +273,9 @@ async function populateServerListings(){
     const servers = distro.servers
     let htmlString = ''
     for(const serv of servers){
+        if(serv.rawServer.serverCode && !ConfigManager.getServerCodes().includes(serv.rawServer.serverCode)){
+            continue
+        }
         htmlString += `<button class="serverListing" servid="${serv.rawServer.id}" ${serv.rawServer.id === giaSel ? 'selected' : ''}>
             <img class="serverListingImg" src="${serv.rawServer.icon}"/>
             <div class="serverListingDetails">
