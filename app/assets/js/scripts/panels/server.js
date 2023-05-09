@@ -16,6 +16,7 @@ const {
 const DiscordWrapper = require('./assets/js/discordwrapper')
 const ProcessBuilder = require('./assets/js/processbuilder')
 const LauncherScript = require('./assets/js/launcherscript')
+const serverSelector = require('./assets/js/scripts/serverSelector')
 const {
 	RestResponseStatus,
 	isDisplayableError
@@ -51,31 +52,41 @@ function updateSelectedServer(serv) {
 	ConfigManager.setSelectedServer(serv != null ? serv.rawServer.id : null)
 	ConfigManager.save()
 
-	// Logo
-	if (serv.rawServer.launcherPage.logo != null) {
-		server.logo.innerHTML = '<img src="' + serv.rawServer.launcherPage.logo + '" alt="' + serv.rawServer.name + '">'
-	} else {
-		server.logo.innerHTML = serv.rawServer.name
-	}
+	if (serv.rawServer.launcherPage) {
+		// Logo
+		if (serv.rawServer.launcherPage.logo != null) {
+			server.logo.innerHTML = '<img src="' + serv.rawServer.launcherPage.logo + '" alt="' + serv.rawServer.name + '">'
+		} else {
+			server.logo.innerHTML = serv.rawServer.name
+		}
 
-	// Icon
-	if (serv.rawServer.launcherPage.icon != null) {
-		server.statusIcon.setAttribute('src', serv.rawServer.launcherPage.icon)
-	} else {
-		server.statusIcon.setAttribute('src', "./assets/images/icons/error.png")
-	}
+		// Icon
+		if (serv.rawServer.launcherPage.icon != null) {
+			server.statusIcon.setAttribute('src', serv.rawServer.launcherPage.icon)
+		} else {
+			server.statusIcon.setAttribute('src', "./assets/images/icons/error.png")
+		}
 
-	// Background
-	if (serv.rawServer.launcherPage.background != null) {
-		server.background.setAttribute('src', serv.rawServer.launcherPage.background)
-	} else {
-		server.background.setAttribute('src', "./assets/images/backgrounds/" + document.body.getAttribute('bkid') + ".jpg")
-	}
+		// Background
+		if (serv.rawServer.launcherPage.background != null) {
+			server.background.setAttribute('src', serv.rawServer.launcherPage.background)
+		} else {
+			server.background.setAttribute('src', "./assets/images/backgrounds/" + document.body.getAttribute('bkid') + ".jpg")
+		}
 
-	// Wiki
-	if (!serv.rawServer.launcherPage.wiki) {
+		// Wiki
+		if (serv.rawServer.launcherPage.wiki) {
+			server.wikiTile.style.display = 'block'
+			server.wikiContent[0].style.display = 'block'
+		} else {
+			server.wikiContent[0].style.display = 'none'
+			server.wikiTile.style.display = 'none'
+		}
+	} else {
 		server.wikiContent[0].style.display = 'none'
 		server.wikiTile.style.display = 'none'
+		server.background.setAttribute('src', "./assets/images/backgrounds/" + document.body.getAttribute('bkid') + ".jpg")
+		server.statusIcon.setAttribute('src', "./assets/images/icons/error.png")
 	}
 
 	// Name
@@ -333,6 +344,6 @@ playBtn.addEventListener("click", () => {
 	LauncherScript.launchGame()
 });
 
-switchBtn.addEventListener("click", () => {
+switchBtn.addEventListener("click", async () => {
 	showServerSelector()
 });

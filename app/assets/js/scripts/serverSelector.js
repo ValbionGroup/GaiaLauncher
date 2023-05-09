@@ -22,36 +22,42 @@ function createServerItem(server, isActive) {
 	if (isActive) {
 		div.classList.add('active');
 	}
-	div.id = server.getID();
+	div.id = server.rawServer.id;
+	if (server.rawServer.launcherPage) {
+		server.rawServer.launcherPage.icon = server.rawServer.icon
+		iconUrl = server.rawServer.icon
+	} else {
+		iconUrl = "./assets/images/icons/error.png"
+	}
 	div.innerHTML = `
 		<div class="header">
-			<img class="img" src="${server.getIcon()}" />
-			<div class="name">${server.getName()}</div>
-			<div class="desc">${server.getDescription()}</div>
+			<img class="img" src="${iconUrl}" />
+			<div class="name">${server.rawServer.name}</div>
+			<div class="desc">${server.rawServer.description}</div>
 			<div class="version">
-				<div class="text">${server.getVersion()}</div>
+				<div class="text">${server.rawServer.version}</div>
 			</div>
 		</div>
 	`;
 	return div;
 }
 
-function populateServerListings() {
-	const distro = DistroManager.getDistribution()
+async function populateServerListings() {
+	const distro = await DistroAPI.getDistribution()
 	const giaSel = ConfigManager.getSelectedServer()
-	const servers = distro.getServers()
+	const servers = distro.servers
 	document.querySelector('.serverSelector-content section').innerHTML = ''
 	for (const serv of servers) {
-		if (serv.getServerCode() && !ConfigManager.getServerCodes().includes(serv.getServerCode())) {
+		if (serv.rawServer.serverCode && !ConfigManager.getServerCodes().includes(serv.rawServer.serverCode)) {
 			continue
 		}
-		const isActive = giaSel === serv.getID()
+		const isActive = giaSel === serv.rawServer.id
 		document.querySelector('.serverSelector-content section').appendChild(createServerItem(serv, isActive))
 	}
 }
 
-function showServerSelector() {
-	prepareServerSelectionList()
+async function showServerSelector() {
+	await prepareServerSelectionList()
 	const serverSelector = document.getElementById('serverSelectorContainer')
 	serverSelector.style.display = "";
 	setTimeout(() => {
@@ -59,16 +65,16 @@ function showServerSelector() {
 	}, 100)
 	if (hasRPC) {
 		DiscordWrapper.updateDetails('Sélectionne un serveur...')
-    	DiscordWrapper.clearState()
+		DiscordWrapper.clearState()
 	}
 }
 
-function prepareServerSelectionList() {
-	populateServerListings()
+async function prepareServerSelectionList() {
+	await populateServerListings()
 	setServerListingHandlers()
 }
 
-document.querySelector('.serverSelector-close.icon-close').onclick = e => {
+document.querySelector('.serverSelector-close.icon-close').onclick = async e => {
 	const serverSelector = document.getElementById('serverSelectorContainer')
 	serverSelector.classList.toggle('show')
 	setTimeout(() => {
@@ -76,26 +82,26 @@ document.querySelector('.serverSelector-close.icon-close').onclick = e => {
 	}, 1000)
 
 	const listings = document.getElementsByClassName('serverDropdown')
-    for(let i=0; i<listings.length; i++){
-        if(listings[i].classList.contains('active')){
-            const serv = DistroManager.getDistribution().getServer(listings[i].id)
-            updateSelectedServer(serv)
-            refreshServerStatus(true)
+	for(let i=0; i<listings.length; i++){
+		if(listings[i].classList.contains('active')){
+			const serv = (await DistroAPI.getDistribution()).getServerById(listings[i].id)
+			updateSelectedServer(serv)
+			refreshServerStatus(true)
 			if (hasRPC) {
 				DiscordWrapper.updateDetails('Prêt à jouer !')
-				DiscordWrapper.updateState('> Sur ' + serv.getName())
+				DiscordWrapper.updateState('> Sur ' + serv.rawServer.name)
 			}
-            return
-        }
-    }
+			return
+		}
+	}
 
-    if(listings.length > 0){
-        const serv = DistroManager.getDistribution().getServer(listings[i].id)
-        updateSelectedServer(serv)
-        toggleOverlay(false)
+	if(listings.length > 0){
+		const serv = (await DistroAPI.getDistribution()).getServerById(listings[i].id)
+		updateSelectedServer(serv)
+		toggleOverlay(false)
 		if (hasRPC) {
 			DiscordWrapper.updateDetails('Prêt à jouer !')
-			DiscordWrapper.updateState('> Sur ' + serv.getName())
+			DiscordWrapper.updateState('> Sur ' + serv.rawServer.name)
 		}
-    }
+	}
 }
