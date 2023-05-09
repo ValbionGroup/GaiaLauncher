@@ -12,7 +12,6 @@ let hasRPC = false
 
 const msftLoginLogger = LoggerUtil.getLogger('Microsoft Login')
 const msftLogoutLogger = LoggerUtil.getLogger('Microsoft Logout')
-const loggerAccount = LoggerUtil.getLogger('AuthManager')
 
 const loginOptionMicrosoft = document.querySelector('#microsoft #add');
 const loginOptionMojang = document.querySelector('#mojang #add');
@@ -24,7 +23,6 @@ const mojangForm = document.getElementById('loginContainer');
 const mojangCancel = document.querySelector(".connect-close");
 
 const loginWithMojang = async () => {
-	loggerAccount.log('Logging in with Mojang...');
 	$(mojangForm).fadeIn(150, () => {
 		$('#main').attr('tabindex', '-1');
 		mojangForm.firstElementChild.classList.toggle('show');
@@ -32,7 +30,6 @@ const loginWithMojang = async () => {
 }
 
 const loginWithMicrosoft = async () => {
-	loggerAccount.log('Logging in with Microsoft...');
 	ipcRenderer.send(MSFT_OPCODE.OPEN_LOGIN)
 }
 
@@ -50,11 +47,11 @@ function addAccount(account, isActive) {
 	}
 	div.id = account.uuid;
 	div.innerHTML = `
-      <img class="acc-image" src="https://mc-heads.net/avatar/${account.uuid}/250/avatar.png"/>
-      <div class="acc-username">${account.displayName}</div>
-      <div class="acc-email">${account.uuid}</div>
-      <div class="acc-delete icon-account-delete"></div>
-    `
+		<img class="acc-image" src="https://mc-heads.net/avatar/${account.uuid}/250/avatar.png"/>
+		<div class="acc-username">${account.displayName}</div>
+		<div class="acc-email">${account.uuid}</div>
+		<div class="acc-delete icon-account-delete"></div>
+	`
 	return div;
 }
 
@@ -71,7 +68,6 @@ function closeMsftLoader() {
 ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
 	if (arguments_[0] === MSFT_REPLY_TYPE.ERROR) {
 
-		loggerAccount.log(arguments_)
 		closeMsftLoader()
 		if (arguments_[1] === MSFT_ERROR.NOT_FINISHED) {
 			// User cancelled.
@@ -100,10 +96,10 @@ ipcRenderer.on(MSFT_OPCODE.REPLY_LOGIN, (_, ...arguments_) => {
 			// This is probably if you messed up the app registration with Azure.
 			let error = queryMap.error // Error might be 'access_denied' ?
 			let errorDesc = queryMap.error_description
-			loggerAccount.error('Error getting authCode, is Azure application registered correctly?')
-			loggerAccount.error(error)
-			loggerAccount.error(errorDesc)
-			loggerAccount.error('Full query map', queryMap)
+			msftLoginLogger.error('Error getting authCode, is Azure application registered correctly?')
+			msftLoginLogger.error(error)
+			msftLoginLogger.error(errorDesc)
+			msftLoginLogger.error('Full query map', queryMap)
 			setPopupContent(
 				"Une erreur est survenue",
 				`<b>${error}</b>: ` + errorDesc,
