@@ -224,6 +224,7 @@ const refreshServerStatus = async (fade = false) => {
 		} else {
 			document.querySelector('.server .etat-text .online').classList.add('off')
 			document.querySelector('.server .etat-text .online').classList.remove('on')
+			document.querySelector('.server .server-text .desc #ping').innerHTML = ''
 			document.querySelector('.server .server-text .desc span').classList.add('red')
 			document.querySelector('.server .server-text .desc span').classList.remove('green')
 		}
