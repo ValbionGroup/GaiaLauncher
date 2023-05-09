@@ -24,8 +24,7 @@ function createServerItem(server, isActive) {
 	}
 	div.id = server.rawServer.id;
 	if (server.rawServer.launcherPage) {
-		server.rawServer.launcherPage.icon = server.rawServer.icon
-		iconUrl = server.rawServer.icon
+		iconUrl = server.rawServer.launcherPage.icon
 	} else {
 		iconUrl = "./assets/images/icons/error.png"
 	}
