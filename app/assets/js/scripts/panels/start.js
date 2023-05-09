@@ -68,55 +68,46 @@ document.getElementById('height').addEventListener('keydown', (e) => {
 })
 
 // DOM Cache
-const settingsMaxRAMRange = document.getElementById('settingsMaxRAMRange')
-const settingsMinRAMRange = document.getElementById('settingsMinRAMRange')
-const settingsMaxRAMLabel = document.getElementById('settingsMaxRAMLabel')
-const settingsMinRAMLabel = document.getElementById('settingsMinRAMLabel')
-const settingsMemoryTotal = document.getElementById('settingsMemoryTotal')
-const settingsMemoryAvail = document.getElementById('settingsMemoryAvail')
-const settingsJavaExecDetails = document.getElementById('settingsJavaExecDetails')
+const launchSettingsMaxRAMRange     = document.getElementById('launchSettingsMaxRAMRange')
+const launchSettingsMinRAMRange     = document.getElementById('launchSettingsMinRAMRange')
+const launchSettingsMaxRAMLabel     = document.getElementById('launchSettingsMaxRAMLabel')
+const launchSettingsMinRAMLabel     = document.getElementById('launchSettingsMinRAMLabel')
+const launchSettingsMemoryTotal     = document.getElementById('launchSettingsMemoryTotal')
+const launchSettingsMemoryAvail     = document.getElementById('launchSettingsMemoryAvail')
+const launchSettingsJavaExecDetails = document.getElementById('launchSettingsJavaExecDetails')
+const launchSettingsJavaReqDesc     = document.getElementById('launchSettingsJavaReqDesc')
+const launchSettingsJvmOptsLink     = document.getElementById('launchSettingsJvmOptsLink')
 
-// Store maximum memory values.
-const SETTINGS_MAX_MEMORY = ConfigManager.getAbsoluteMaxRAM()
-const SETTINGS_MIN_MEMORY = ConfigManager.getAbsoluteMinRAM()
-
-// Set the max and min values for the ranged sliders.
-settingsMaxRAMRange.setAttribute('max', SETTINGS_MAX_MEMORY)
-settingsMaxRAMRange.setAttribute('min', SETTINGS_MIN_MEMORY)
-settingsMinRAMRange.setAttribute('max', SETTINGS_MAX_MEMORY)
-settingsMinRAMRange.setAttribute('min', SETTINGS_MIN_MEMORY)
-
-// Bind on change event for min memory container.
 settingsMinRAMRange.onchange = (e) => {
 
-	// Current range values
-	const sMaxV = Number(settingsMaxRAMRange.getAttribute('value'))
-	const sMinV = Number(settingsMinRAMRange.getAttribute('value'))
+    // Current range values
+    const sMaxV = Number(settingsMaxRAMRange.getAttribute('value'))
+    const sMinV = Number(settingsMinRAMRange.getAttribute('value'))
 
-	// Get reference to range bar.
-	const bar = e.target.getElementsByClassName('rangeSliderBar')[0]
-	// Calculate effective total memory.
-	const max = (os.totalmem() - 1000000000) / 1000000000
+    // Get reference to range bar.
+    const bar = e.target.getElementsByClassName('rangeSliderBar')[0]
+    // Calculate effective total memory.
+    const max = os.totalmem()/1073741824
 
-	// Change range bar color based on the selected value.
-	if (sMinV >= max / 1.25) {
-		bar.style.background = '#e86060'
-	} else if (sMinV >= max / 2) {
-		bar.style.background = '#e8e18b'
-	} else {
-		bar.style.background = null
-	}
+    // Change range bar color based on the selected value.
+    if(sMinV >= max/2){
+        bar.style.background = '#e86060'
+    } else if(sMinV >= max/4) {
+        bar.style.background = '#e8e18b'
+    } else {
+        bar.style.background = null
+    }
 
-	// Increase maximum memory if the minimum exceeds its value.
-	if (sMaxV < sMinV) {
-		const sliderMeta = calculateRangeSliderMeta(settingsMaxRAMRange)
-		updateRangedSlider(settingsMaxRAMRange, sMinV,
-			((sMinV - sliderMeta.min) / sliderMeta.step) * sliderMeta.inc)
-		settingsMaxRAMLabel.innerHTML = sMinV.toFixed(1) + 'G'
-	}
+    // Increase maximum memory if the minimum exceeds its value.
+    if(sMaxV < sMinV){
+        const sliderMeta = calculateRangeSliderMeta(settingsMaxRAMRange)
+        updateRangedSlider(settingsMaxRAMRange, sMinV,
+            ((sMinV-sliderMeta.min)/sliderMeta.step)*sliderMeta.inc)
+        settingsMaxRAMLabel.innerHTML = sMinV.toFixed(1) + 'G'
+    }
 
-	// Update label
-	settingsMinRAMLabel.innerHTML = sMinV.toFixed(1) + 'G'
+    // Update label
+    settingsMinRAMLabel.innerHTML = sMinV.toFixed(1) + 'G'
 }
 
 // Bind on change event for max memory container.

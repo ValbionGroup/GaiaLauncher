@@ -239,7 +239,7 @@ let serverStatusListener = setInterval(() => refreshServerStatus(true), 300000)
 // News
 // TODO - Add news
 // FIXME - News are not working
-const parseNews = async () => {
+const parseNews = async () => { /*
 	let news = document.querySelector(".news");
 	news.innerHTML = "";
 	loggerServer.log("Loading news...");
@@ -328,7 +328,7 @@ const parseNews = async () => {
 			if (event.target.tagName.toLowerCase() != "a") nw.Shell.openExternal(event.target.parentElement.href);
 			else nw.Shell.openExternal(event.target.href);
 		});
-	}
+	} **/
 }
 
 function toDate(date) {
