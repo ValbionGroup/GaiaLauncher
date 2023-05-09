@@ -42,7 +42,7 @@ if(!isDev){
         switch(arg){
             case 'checking-for-update':
                 loggerAutoUpdater.info('Checking for update..')
-                settingsUpdateButtonStatus('Recherche de mise à jour...', true)
+                setUpdateButtonStatus('Recherche de mise à jour...', true)
                 break
             case 'update-available':
                 loggerAutoUpdater.info('New update available', info.version)
@@ -52,11 +52,11 @@ if(!isDev){
                     showUpdateBubble()
                 }
                 
-                populateSettingsUpdateInformation(info)
+                populateUpdateInformation(info)
                 break
             case 'update-downloaded':
                 loggerAutoUpdater.info('Mise à jour ' + info.version + ' prête à être installée.')
-                settingsUpdateButtonStatus('Installer maintenant', false, () => {
+                setUpdateButtonStatus('Installer maintenant', false, () => {
                     if(!isDev){
                         ipcRenderer.send('autoUpdateAction', 'installUpdateNow')
                     }
@@ -65,7 +65,7 @@ if(!isDev){
                 break
             case 'update-not-available':
                 loggerAutoUpdater.info('No new update found.')
-                settingsUpdateButtonStatus('Chercher des mises à jour')
+                setUpdateButtonStatus('Chercher des mises à jour')
                 break
             case 'ready':
                 updateCheckListener = setInterval(() => {
