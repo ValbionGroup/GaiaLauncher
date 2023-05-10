@@ -346,5 +346,5 @@ playBtn.addEventListener("click", () => {
 });
 
 switchBtn.addEventListener("click", async () => {
-	showServerSelector()
+	await showServerSelector()
 });

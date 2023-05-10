@@ -2,14 +2,15 @@
  * Start Tab
  */
 const os = require('os')
-const semver = require('semver')
 
 const settingsState = {
 	invalid: new Set()
 }
 
 document.querySelector("#panels #start").addEventListener("click", (event) => {
-	if (event.target.classList.contains("header")) event.path[1].classList.toggle("open");
+	console.log(event.target.classList)
+	console.log(event.target)
+	if (event.target.classList.contains("header")) event.target.parentNode.classList.toggle("open");
 });
 
 function bindFileSelectors() {
