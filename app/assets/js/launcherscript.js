@@ -172,7 +172,7 @@ function initDefinedLoader(percent) {
 	let span = homePlay.querySelector("span");
 	span.innerHTML = "<b>Téléchargement des fichiers</b> — 0%";
 
-	sidePlay.ariaLabel = "Téléchargement des fichiers — 0%\n0 Mo sur 0 Mo";
+	sidePlay.ariaLabel = "Téléchargement des fichiers — 0%";
 
 	setProgress(percent);
 }
@@ -515,12 +515,14 @@ async function dlAsync(login = true) {
 		}
 	})
 
-	initDefinedLoader(0)
 	loggerLaunchSuite.info('Validating files.')
-    changeLoaderText('Validation de l\'intégrité des assets...')
+    setUndefinedLoader('Validation de l\'intégrité des assets...')
     let invalidFileCount = 0
     try {
         invalidFileCount = await fullRepairModule.verifyFiles(percent => {
+			if (percent === 0) {
+				initDefinedLoader(0)
+			}
             setDownloadPercentage(percent, 'Validation de l\'intégrité des assets')
         })
         setDownloadPercentage(100, 'Validation de l\'intégrité des assets')
