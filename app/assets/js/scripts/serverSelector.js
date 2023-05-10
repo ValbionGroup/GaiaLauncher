@@ -62,10 +62,6 @@ async function showServerSelector() {
 	setTimeout(() => {
 		serverSelector.classList.toggle('show')
 	}, 100)
-	if (hasRPC) {
-		DiscordWrapper.updateDetails('Sélectionne un serveur...')
-		DiscordWrapper.clearState()
-	}
 }
 
 async function prepareServerSelectionList() {
@@ -86,10 +82,6 @@ document.querySelector('.serverSelector-close.icon-close').onclick = async e => 
 			const serv = (await DistroAPI.getDistribution()).getServerById(listings[i].id)
 			updateSelectedServer(serv)
 			refreshServerStatus(true)
-			if (hasRPC) {
-				DiscordWrapper.updateDetails('Prêt à jouer !')
-				DiscordWrapper.updateState('> Sur ' + serv.rawServer.name)
-			}
 			return
 		}
 	}
@@ -98,9 +90,5 @@ document.querySelector('.serverSelector-close.icon-close').onclick = async e => 
 		const serv = (await DistroAPI.getDistribution()).getServerById(listings[i].id)
 		updateSelectedServer(serv)
 		toggleOverlay(false)
-		if (hasRPC) {
-			DiscordWrapper.updateDetails('Prêt à jouer !')
-			DiscordWrapper.updateState('> Sur ' + serv.rawServer.name)
-		}
 	}
 }
