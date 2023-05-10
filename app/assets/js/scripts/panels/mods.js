@@ -20,3 +20,22 @@ async function populateServerIndicator() {
 			</div>
 		`
 }
+
+/* RAM SETTINGS */
+
+const memoryTotal = document.getElementById('total-ram')
+const memoryAvail = document.getElementById('free-ram')
+
+function populateMemoryStatus(){
+    memoryTotal.innerHTML = Number((os.totalmem()-1073741824)/1073741824).toFixed(1) + ' Go'
+    memoryAvail.innerHTML = Number(os.freemem()/1073741824).toFixed(1) + ' Go'
+}
+
+
+
+async function refreshModsPanel() {
+	await populateServerIndicator()
+	populateMemoryStatus()
+}
+
+refreshModsPanel()
