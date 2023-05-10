@@ -1,0 +1,94 @@
+.server-box {
+	position: relative;
+	margin: 12px 25px 0 0;
+	width: 100%;
+	border-radius: 10px;
+	background-color: var(--box);
+
+	.header {
+		position: relative;
+		top: 0px;
+		left: 0px;
+		height: 70px;
+		width: 100%;
+		cursor: pointer;
+
+		.icon {
+			position: absolute;
+			top: 20px;
+			left: 20px;
+			width: 30px;
+			height: 30px;
+			color: var(--text);
+			transition: color .2s;
+			pointer-events: none;
+
+			&:before {
+				width: 30px;
+				height: 30px;
+				font-size: 30px;
+			}
+
+			img {
+				width: 30px;
+				height: 30px;
+			}
+		}
+
+		.title {
+			position: absolute;
+			top: 11px;
+			left: 70px;
+			font: normal normal bold 16px/25px Poppins;
+			color: var(--text);
+			transition: color .2s;
+			pointer-events: none;
+		}
+
+		.description {
+			position: absolute;
+			top: 32px;
+			left: 70px;
+			font: normal normal normal 16px/25px Poppins;
+			color: var(--text);
+			transition: color .2s;
+			pointer-events: none;
+		}
+
+		.mc-version {
+			position: absolute;
+			top: 32px;
+			right: 20px;
+			font: normal normal normal 16px/25px Poppins;
+			color: var(--text);
+			transition: color .2s;
+			pointer-events: none;
+		}
+
+		.server-version {
+			position: absolute;
+			top: 32px;
+			right: 20px;
+			font: normal normal normal 16px/25px Poppins;
+			color: var(--text);
+			transition: color .2s;
+			pointer-events: none;
+		}
+
+		.switch {
+			position: absolute;
+			top: 20px;
+			right: 25px;
+			width: 30px;
+			height: 30px;
+			color: var(--icon-unselected);
+			pointer-events: none;
+
+			&:before {
+				width: 30px;
+				height: 30px;
+				font-size: 30px;
+			}
+		}
+	}
+}
