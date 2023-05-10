@@ -1,3 +1,6 @@
+const os     = require('os')
+const semver = require('semver')
+
 const actualVersionText		= document.getElementById('actual-version')
 const actualVersionDateText = document.getElementById('actual-version-date')
 const updateMessageText		= document.getElementById('update-message')
@@ -28,7 +31,7 @@ function populateUpdateInformation(data){
 		updateMessageText.innerHTML = 'Vous avez la dernière version du launcher.'
 		updateBox.classList.replace('new-update', 'update')
 		updateIcon.classList.replace('icon-update', 'icon-check')
-		settingsUpdateChangelogCont.style.display = 'none'
+		updateContent.style.display = 'none'
 		
 		setUpdateButtonStatus('Vérifier les mises à jour', false, () => {
 			if(!isDev){
@@ -46,11 +49,11 @@ function populateActualVersionInformation(){
 }
 
 function setUpdateButtonStatus(text, disabled = false, handler = null){
-	settingsUpdateActionButton.innerHTML = text
-	settingsUpdateActionButton.disabled = disabled
-	if(handler != null){
-		settingsUpdateActionButton.onclick = handler
-	}
+	// settingsUpdateActionButton.innerHTML = text
+	// settingsUpdateActionButton.disabled = disabled
+	// if(handler != null){
+	// 	settingsUpdateActionButton.onclick = handler
+	// }
 }
 
 /**
