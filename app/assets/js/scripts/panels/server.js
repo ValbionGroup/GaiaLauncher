@@ -239,12 +239,12 @@ let serverStatusListener = setInterval(() => refreshServerStatus(true), 300000)
 // News
 // TODO - Add news
 // FIXME - News are not working
-const parseNews = async () => { /*
+const parseNews = async () => {
 	let news = document.querySelector(".news");
 	news.innerHTML = "";
-	loggerServer.log("Loading news...");
+	// loggerServer.log("Loading news...");
 
-	try {
+	/** try {
 		let rss = await fetch("https://gaialaunchernews.blogspot.com/feeds/posts/default").then(res => res.text());
 		let rssparse = JSON.parse(convert.xml2json(rss, {
 			compact: true
@@ -307,20 +307,20 @@ const parseNews = async () => { /*
 			news.appendChild(block);
 		}
 	} catch (e) {
-		console.error(e);
+		console.error(e); */
 		let date = this.toDate(new Date());
 		let block = document.createElement("div");
 		block.classList.add("block");
 		block.innerHTML = `
-      <div class="news-header error">
-        <div class="header-text">
-          <img class="avatar" src="./assets/images/icons/error.png"></img>
-          <a class="title" href="https://games.valbion.com/launcher">Une erreur est survenue. Merci de réessayer plus tard.</a>
-        </div>
-      </div>
-      `;
+			<div class="news-header error">
+				<div class="header-text">
+				<img class="avatar" src="./assets/images/icons/error.png"></img>
+				<a class="title" href="https://games.valbion.com/launcher">Une erreur est survenue. Merci de réessayer plus tard.</a>
+				</div>
+			</div>
+		`;
 		news.appendChild(block);
-	}
+	/** }
 	let anchors = document.querySelectorAll('a[href^="http"]');
 	for (let anchor of anchors) {
 		anchor.addEventListener("click", (event) => {
@@ -328,7 +328,7 @@ const parseNews = async () => { /*
 			if (event.target.tagName.toLowerCase() != "a") nw.Shell.openExternal(event.target.parentElement.href);
 			else nw.Shell.openExternal(event.target.href);
 		});
-	} **/
+	} */
 }
 
 function toDate(date) {
