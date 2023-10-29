@@ -271,7 +271,7 @@ function showLaunchFailure(title, desc){
 		title,
 		desc,
 		'warning',
-		'Okay'
+		'Ok'
 	)
 	setPopupHandler(() => {
 		togglePopup(false)

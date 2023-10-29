@@ -290,7 +290,7 @@ function showLaunchFailure(title, desc){
     setOverlayContent(
         title,
         desc,
-        'Okay'
+        'Ok'
     )
     setOverlayHandler(null)
     toggleOverlay(true)

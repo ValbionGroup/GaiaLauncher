@@ -708,7 +708,7 @@ function bindDropinModsRemoveButton(){
                 setOverlayContent(
                     `Failed to Delete<br>Drop-in Mod ${fullName}`,
                     'Make sure the file is not in use and try again.',
-                    'Okay'
+                    'Ok'
                 )
                 setOverlayHandler(null)
                 toggleOverlay(true)
@@ -763,7 +763,7 @@ function saveDropinModConfiguration(){
                         setOverlayContent(
                             'Failed to Toggle<br>One or More Drop-in Mods',
                             err.message,
-                            'Okay'
+                            'Ok'
                         )
                         setOverlayHandler(null)
                         toggleOverlay(true)
