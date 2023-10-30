@@ -5,13 +5,36 @@
     border-radius: 10px;
     background-color: var(--box);
 
-
     &.update {
         background-color: var(--box-button-gradient-1);
         background-image: linear-gradient(145deg, var(--box-button-gradient-1) 0%, var(--box-button-gradient-2) 150%);
+        
+        display: flex;
+        flex-direction: row;
+        align-items: center;
 
         div {
             color: var(--icon-active) !important;
+        }
+
+        .button {
+            position: relative;
+            display: inline-flex;
+            font: normal normal normal 16px/25px Poppins;
+            padding: 8px 40px;
+            color: var(--text) !important;
+            background-color: var(--box) !important;
+            transition: background-color .2s, color .2s;
+            border-radius: 22px;
+            cursor: pointer;
+            margin-right: 15px;
+            white-space: nowrap;
+            align-items: center;
+            height: fit-content;
+
+            &:hover {
+                background-color: var(--box-hover) !important;
+            }
         }
     }
 
