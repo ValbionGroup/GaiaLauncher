@@ -113,13 +113,13 @@
 		</div>
 		<div class="content">
 			<div class="information">
-				L'emplacement est vérifié au lancement du jeu.
-				Java doit être java 8 ou supérieur en 64 bit.<br/>
+				L'emplacement est vérifié au lancement du jeu.<br/>
+				Java doit être <strong id="java-requested-version">java 8</strong> ou supérieur en 64 bit.<br/>
 				Le chemin d'accès doit terminer par <b>bin\javaw.exe</b>
 			</div>
-			<input type="text" value="" class="path" id="path" disabled />
-			<input type="button" value="Changer" class="path-button" />
-			<input type="file" id="path-file" class="fake" accept="application/octet-stream" />
+			<input type="text" value="" class="path" id="java-path" disabled />
+			<button type="button" id="java-path-file-button" class="path-button" dialogTitle="Sélectionnez l'executable" dialogDirectory="false">Changer</button>
+			<span class="java-exec-details" id="java-details">Sélection invalide</span>
 		</div>
 	</div>
 

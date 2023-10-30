@@ -13,47 +13,6 @@ document.querySelector("#panels #start").addEventListener("click", (event) => {
 	if (event.target.classList.contains("header")) event.target.parentNode.classList.toggle("open");
 });
 
-function bindFileSelectors() {
-	for (let ele of document.getElementsByClassName('settingsFileSelButton')) {
-
-		ele.onclick = async e => {
-			const isJavaExecSel = ele.id === 'settingsJavaExecSel'
-			const directoryDialog = ele.hasAttribute('dialogDirectory') && ele.getAttribute('dialogDirectory') == 'true'
-			const properties = directoryDialog ? ['openDirectory', 'createDirectory'] : ['openFile']
-
-			const options = {
-				properties
-			}
-
-			if (ele.hasAttribute('dialogTitle')) {
-				options.title = ele.getAttribute('dialogTitle')
-			}
-
-			if (isJavaExecSel && process.platform === 'win32') {
-				options.filters = [{
-						name: 'Executables',
-						extensions: ['exe']
-					},
-					{
-						name: 'All Files',
-						extensions: ['*']
-					}
-				]
-			}
-
-			const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), options)
-			if (!res.canceled) {
-				ele.previousElementSibling.value = res.filePaths[0]
-				if (isJavaExecSel) {
-					populateJavaExecDetails(ele.previousElementSibling.value)
-				}
-			}
-		}
-	}
-}
-
-bindFileSelectors()
-
 /**
  * Disable decimals, negative signs, and scientific notation.
  */
@@ -250,28 +209,6 @@ function updateRangedSlider(element, value, notch) {
 function populateMemoryStatus() {
 	settingsMemoryTotal.innerHTML = Number((os.totalmem() - 1000000000) / 1000000000).toFixed(1) + 'G'
 	settingsMemoryAvail.innerHTML = Number(os.freemem() / 1000000000).toFixed(1) + 'G'
-}
-
-/**
- * Validate the provided executable path and display the data on
- * the UI.
- * 
- * @param {string} execPath The executable path to populate against.
- */
-function populateJavaExecDetails(execPath) {
-	const jg = new JavaGuard(DistroManager.getDistribution().getServer(ConfigManager.getSelectedServer()).getMinecraftVersion())
-	jg._validateJavaBinary(execPath).then(v => {
-		if (v.valid) {
-			const vendor = v.vendor != null ? ` (${v.vendor})` : ''
-			if (v.version.major < 9) {
-				settingsJavaExecDetails.innerHTML = `Selected: Java ${v.version.major} Update ${v.version.update} (x${v.arch})${vendor}`
-			} else {
-				settingsJavaExecDetails.innerHTML = `Selected: Java ${v.version.major}.${v.version.minor}.${v.version.revision} (x${v.arch})${vendor}`
-			}
-		} else {
-			settingsJavaExecDetails.innerHTML = 'Invalid Selection'
-		}
-	})
 }
 
 /**

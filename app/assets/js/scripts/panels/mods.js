@@ -180,13 +180,81 @@ function populateMemoryStatus(){
 }
 
 
+/* JAVA SETTINGS */
+
+const javaExecPath = document.getElementById('java-path')
+const javaExecDetails = document.getElementById('java-details')
+const javaReqVer = document.getElementById('java-requested-version')
+
+function bindFileSelectors() {
+    for (let ele of document.getElementsByClassName('path-button')) {
+
+        ele.onclick = async e => {
+            const isJavaExecSel = ele.id === 'path-file-button'
+            const directoryDialog = ele.hasAttribute('dialogDirectory') && ele.getAttribute('dialogDirectory') == 'true'
+            const properties = directoryDialog ? ['openDirectory', 'createDirectory'] : ['openFile']
+
+            const options = {
+                properties
+            }
+
+            if (ele.hasAttribute('dialogTitle')) {
+                options.title = ele.getAttribute('dialogTitle')
+            }
+
+            if (isJavaExecSel && process.platform === 'win32') {
+                options.filters = [
+                    { name: 'Executables', extensions: ['exe'] },
+                    { name: 'All Files', extensions: ['*'] }
+                ]
+            }
+
+            const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), options)
+            if (!res.canceled) {
+                ele.previousElementSibling.value = res.filePaths[0]
+                if (isJavaExecSel) {
+                    await populateJavaExecDetails(ele.previousElementSibling.value)
+                }
+            }
+        }
+    }
+}
+
+bindFileSelectors()
+
+/**
+ * Validate the provided executable path and display the data on
+ * the UI.
+ * 
+ * @param {string} execPath The executable path to populate against.
+ */
+async function populateJavaExecDetails(execPath) {
+    const server = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
+
+    const details = await validateSelectedJvm(ensureJavaDirIsRoot(execPath), server.effectiveJavaOptions.supported)
+
+    if (details != null) {
+        javaExecDetails.innerHTML = `Sélectionné : Java ${details.semverStr} (${details.vendor})`
+    } else {
+        javaExecDetails.innerHTML = 'Sélection invalide'
+    }
+}
+
+function populateJavaReqDesc(server) {
+    javaReqVer.innerHTML = `Java ${server.effectiveJavaOptions.suggestedMajor}`
+}
+
 
 async function refreshModsPanel() {
+    const server = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
 	await populateServerIndicator()
 	populateMemoryStatus()
 	await resolveModsForUI()
     // await resolveShaderpacksForUI()
     bindModsToggleSwitch()
+    populateJavaReqDesc(server)
+    // bindMinMaxRam(server)
+    // bindRangeSlider(server)
 }
 
 refreshModsPanel()
