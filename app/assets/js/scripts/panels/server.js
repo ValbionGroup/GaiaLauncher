@@ -93,7 +93,7 @@ function updateSelectedServer(serv) {
 	server.statusName.innerHTML = serv.rawServer.name
 
 	if (getCurrentView() === VIEWS.mods) {
-		animateModsTabRefresh()
+		refreshModsPanel()
 	}
 	setLaunchEnabled(serv != null)
 }

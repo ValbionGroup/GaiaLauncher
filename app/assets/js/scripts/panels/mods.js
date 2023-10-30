@@ -130,7 +130,7 @@ function saveModConfiguration(){
  */
 function _saveModConfiguration(modConf){
     for(let m of Object.entries(modConf)){
-        const tSwitch = settingsModsContainer.querySelectorAll(`[formod='${m[0]}']`)
+        const tSwitch = document.querySelectorAll(`[formod='${m[0]}']`)
         if(!tSwitch[0].hasAttribute('dropin')){
             if(typeof m[1] === 'boolean'){
                 modConf[m[0]] = tSwitch[0].checked
@@ -145,6 +145,14 @@ function _saveModConfiguration(modConf){
         }
     }
     return modConf
+}
+
+/**
+ * Save mod configuration for the current selected server.
+ */
+function saveAllModConfigurations() {
+    saveModConfiguration()
+    ConfigManager.save()
 }
 
 /**
