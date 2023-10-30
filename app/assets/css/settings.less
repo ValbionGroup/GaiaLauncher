@@ -121,6 +121,128 @@
                 line-height: 0px;
                 opacity: 0;
             }
+
+            /* mods */
+            .mods {
+                display: none;
+                position: relative;
+
+                .base-mod {
+
+                    .mod-content {
+                        margin-left: 5px;
+                        display: inline-flex;
+                        flex-direction: row;
+                        justify-content: space-between;
+                        margin-bottom: 10px;
+                        width: 100%;
+
+                        .main-wrapper {
+                            display: inline-flex;
+                            flex-direction: row;
+                            justify-content: flex-start;
+                            align-items: center;
+                            width: 100%;
+                            cursor: pointer;
+
+                            .status {
+                                width: 10px;
+                                margin-right: 5px;
+                                height: 10px;
+                                border-radius: 10px;
+                                border: 2px solid var(--box);
+                                transition: all .2s;
+                                background-color: var(--red);
+
+                                &.active {
+                                    background-color: var(--green) !important;
+                                }
+                            }
+
+                            .details {
+                                display: inline-flex;
+                                flex-direction: column;
+
+                                .name {
+                                    position: relative;
+                                    top: 0px;
+                                    left: 10px;
+                                    font: normal normal bold 16px/25px Poppins;
+                                    color: var(--text);
+                                    transition: color .2s;
+                                    pointer-events: none;
+                                }
+
+                                .version {
+                                    position: relative;
+                                    top: 0px;
+                                    left: 10px;
+                                    font: normal normal normal 16px/25px Poppins;
+                                    color: var(--grey);
+                                    transition: color .2s;
+                                    pointer-events: none;
+                                }
+                            }
+                        }
+
+                        .mod-switch {
+                            width: 40px;
+                            height: 24px;
+                            top: 3px;
+                            left: -55px;
+                            position: relative;
+                            border-radius: 50px;
+                            box-sizing: border-box;
+
+                            input {
+                                display: none;
+                            }
+
+                            &[reqmod] {
+                                filter: grayscale(49%) brightness(60%);
+                                pointer-events: none;
+                            }
+
+                            input:checked+.switch-slider:before {
+                                transform: translateX(15px);
+                            }
+
+                            input:checked+.switch-slider {
+                                background-color: var(--color);
+                                border: 1px solid var(--color);
+                            }
+
+                            .switch-slider {
+                                position: absolute;
+                                cursor: pointer;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                bottom: 0;
+                                background-color: var(--frame);
+                                transition: .4s;
+                                border-radius: 50px;
+                                border: 1px solid rgba(126, 126, 126, 0.57);
+
+                                &:before {
+                                    position: absolute;
+                                    content: "";
+                                    height: 16px;
+                                    width: 16px;
+                                    left: 3px;
+                                    bottom: 3px;
+                                    background-color: var(--checkbox);
+                                    transition: .4s;
+                                    border-radius: 50px;
+                                    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.75);
+
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
     
             /* memory */
     
@@ -394,6 +516,11 @@
                 .information {
                     line-height: 1.6em;
                     opacity: 1;
+                }
+
+                /* mods */
+                .mods {
+                    display: block;
                 }
     
                 /* memory */
