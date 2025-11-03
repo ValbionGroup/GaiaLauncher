@@ -2,7 +2,7 @@ appId: 'gaialauncher'
 productName: 'Gaïa Launcher'
 artifactName: '${productName}-setup-${version}.${ext}'
 
-copyright: 'Copyright © 2023 Valbion Group'
+copyright: 'Copyright © 2025 Valbion Group'
 
 asar: true
 compression: 'maximum'
